@@ -3,11 +3,16 @@
     "name": "cokcok-client",
     "slug": "cokcok-client",
     "version": "0.0.1",
+    "icon": "./assets/icon.png",
     "ios": {
       "bundleIdentifier": "com.cokcok.client"
     },
     "android": {
-      "package": "com.cokcok.client"
+      "package": "com.cokcok.client",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FF4500"
+      }
     }
   }
 }
