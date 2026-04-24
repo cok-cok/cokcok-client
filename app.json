@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "cokcok-client",
+    "slug": "cokcok-client",
+    "version": "0.0.1",
+    "ios": {
+      "bundleIdentifier": "com.cokcok.client"
+    },
+    "android": {
+      "package": "com.cokcok.client"
+    }
+  }
+}
