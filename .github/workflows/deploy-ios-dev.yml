@@ -1,0 +1,95 @@
+name: "[iOS] Deploy to Dev"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate branch
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          echo "🔍 Validating branch: $BRANCH"
+
+          if [[ "$BRANCH" == "main" ]] || [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" =~ ^hotfix/ ]]; then
+            echo "❌ Error: Dev environment deployment not allowed from:"
+            echo "   - main / release/* / hotfix/* branches"
+            echo ""
+            echo "   Use rel or prod workflows for these branches."
+            echo "   Current branch: $BRANCH"
+            exit 1
+          fi
+          echo "✅ Valid branch for dev deployment (develop or feature branch)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Force npm registry (security)
+        run: |
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "✅ Using official npm registry only"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create Apple API Key file
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APPLE_API_KEY_CONTENT }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+
+      - name: Build iOS (Dev)
+        run: yarn ios:build:dev:ci
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ""
+          EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          EXPO_APPLE_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          EXPO_ASC_API_KEY_PATH: ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          EXPO_ASC_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          EXPO_ASC_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+
+      - name: Submit to TestFlight (Dev)
+        run: eas submit --platform ios --latest --profile dev --non-interactive
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ""
+          EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          EXPO_APPLE_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          EXPO_ASC_API_KEY_PATH: ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          EXPO_ASC_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          EXPO_ASC_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+
+      - name: Deploy summary
+        run: |
+          echo "✅ iOS Dev build completed and submitted to TestFlight"
+          echo "📱 Platform: iOS"
+          echo "🏷️ Profile: dev"
+          echo "🔖 Branch: ${{ github.ref_name }}"
+          echo "📦 Commit: ${{ github.sha }}"
+          echo ""
+          echo "Build logs: https://expo.dev/accounts/ghw-dev/projects/cokcok-client/builds"
+          echo "TestFlight: https://appstoreconnect.apple.com/apps/6766532529/testflight"
+          echo ""
+          echo "⏰ TestFlight will be available in 5-10 minutes"
