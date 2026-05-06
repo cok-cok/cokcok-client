@@ -4,6 +4,11 @@
   "main": "index.ts",
   "scripts": {
     "prepare": "husky",
+    "release": "commit-and-tag-version",
+    "release:patch": "commit-and-tag-version --release-as patch",
+    "release:minor": "commit-and-tag-version --release-as minor",
+    "release:major": "commit-and-tag-version --release-as major",
+    "release:dry": "commit-and-tag-version --dry-run",
     "start": "expo start --port 8082",
     "android": "expo run:android --port 8082",
     "ios": "expo run:ios --port 8082"
@@ -17,6 +22,7 @@
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@types/react": "~19.1.10",
+    "commit-and-tag-version": "^12.7.1",
     "husky": "^9.1.7",
     "typescript": "5.9.2"
   },
