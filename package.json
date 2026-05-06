@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "index.ts",
   "scripts": {
+    "eas-build-pre-install": "corepack enable && corepack prepare yarn@4.12.0 --activate",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
@@ -16,7 +17,19 @@
     "release:dry": "commit-and-tag-version --dry-run",
     "start": "expo start --port 8082",
     "android": "expo run:android --port 8082",
-    "ios": "expo run:ios --port 8082"
+    "ios": "expo run:ios --port 8082",
+    "ios:build:dev": "eas build --platform ios --profile dev",
+    "ios:build:rel": "eas build --platform ios --profile rel",
+    "ios:build:prod": "eas build --platform ios --profile prod",
+    "ios:build:dev:ci": "eas build --platform ios --profile dev --non-interactive",
+    "ios:build:rel:ci": "eas build --platform ios --profile rel --non-interactive",
+    "ios:build:prod:ci": "eas build --platform ios --profile prod --non-interactive",
+    "android:build:dev": "eas build --platform android --profile dev",
+    "android:build:rel": "eas build --platform android --profile rel",
+    "android:build:prod": "eas build --platform android --profile prod",
+    "android:build:dev:ci": "eas build --platform android --profile dev --non-interactive",
+    "android:build:rel:ci": "eas build --platform android --profile rel --non-interactive",
+    "android:build:prod:ci": "eas build --platform android --profile prod --non-interactive"
   },
   "dependencies": {
     "expo": "~54.0.32",
@@ -31,6 +44,7 @@
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
     "commit-and-tag-version": "^12.7.1",
+    "eas-cli": "^18.11.0",
     "eslint": "^9",
     "eslint-config-expo": "^55.0.0",
     "eslint-config-prettier": "^10.1.8",
