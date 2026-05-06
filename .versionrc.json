@@ -1,0 +1,19 @@
+{
+  "bumpFiles": [
+    { "filename": "package.json", "type": "json" },
+    { "filename": "app.json", "updater": "scripts/version-updater.cjs" }
+  ],
+  "header": "# Changelog\n\nAll notable changes to this project will be documented in this file.\n",
+  "types": [
+    { "type": "feat", "section": "🚀 Features" },
+    { "type": "fix", "section": "🐛 Bug Fixes" },
+    { "type": "perf", "section": "⚡ Performance" },
+    { "type": "refactor", "section": "♻️ Refactoring" },
+    { "type": "docs", "section": "📝 Documentation" },
+    { "type": "build", "section": "🏗️ Build" },
+    { "type": "ci", "section": "🤖 CI" },
+    { "type": "test", "section": "✅ Tests", "hidden": true },
+    { "type": "style", "section": "💄 Style", "hidden": true },
+    { "type": "chore", "section": "🔧 Chore", "hidden": true }
+  ]
+}

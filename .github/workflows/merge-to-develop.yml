@@ -1,0 +1,65 @@
+name: "[Auto] Merge Main to Develop"
+
+# NOTE on token:
+# Pushes from this workflow use GITHUB_TOKEN, which by design does NOT trigger
+# other workflows (e.g. workflows watching `develop` push). Today no workflow
+# listens on develop push so this is harmless. If we later add one, swap
+# `secrets.GITHUB_TOKEN` for a PAT or GitHub App token to restore triggering.
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main to develop
+        run: |
+          git fetch origin main develop
+          git checkout develop
+
+          # Skip if develop already contains every main commit (no-op merge)
+          AHEAD=$(git rev-list --count develop..origin/main)
+          if [[ "$AHEAD" == "0" ]]; then
+            echo "✅ develop already up-to-date with main, skipping merge"
+            exit 0
+          fi
+
+          echo "📥 main is $AHEAD commit(s) ahead of develop, merging"
+          git merge origin/main --no-ff -m "chore: merge main to develop after production deployment"
+          git push origin develop
+
+      - name: Create PR if merge fails
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'chore: Merge main to develop (auto)',
+              head: 'main',
+              base: 'develop',
+              body: '🤖 Automated PR: Production deployment completed. Please resolve conflicts and merge manually.'
+            });

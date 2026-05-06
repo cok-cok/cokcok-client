@@ -1,0 +1,87 @@
+name: "[Android] Deploy to Dev"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate branch
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          echo "🔍 Validating branch: $BRANCH"
+
+          if [[ "$BRANCH" == "main" ]] || [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" =~ ^hotfix/ ]]; then
+            echo "❌ Error: Dev environment deployment not allowed from:"
+            echo "   - main / release/* / hotfix/* branches"
+            echo ""
+            echo "   Use rel or prod workflows for these branches."
+            echo "   Current branch: $BRANCH"
+            exit 1
+          fi
+          echo "✅ Valid branch for dev deployment (develop or feature branch)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Force npm registry (security)
+        run: |
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "✅ Using official npm registry only"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Restore Google Service Account key
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" | base64 -d > ./google-service-account.json
+          echo "✅ Service account key restored"
+
+      - name: Build Android (Dev)
+        run: yarn android:build:dev:ci
+
+      - name: Submit to Internal Testing (Dev)
+        run: eas submit --platform android --latest --profile dev --non-interactive
+
+      - name: Cleanup secret file
+        if: always()
+        run: rm -f ./google-service-account.json
+
+      - name: Deploy summary
+        run: |
+          echo "✅ Android Dev build completed and submitted to Internal Testing"
+          echo "🤖 Platform: Android"
+          echo "🏷️ Profile: dev"
+          echo "🎯 Track: internal"
+          echo "🔖 Branch: ${{ github.ref_name }}"
+          echo "📦 Commit: ${{ github.sha }}"
+          echo ""
+          echo "Build logs: https://expo.dev/accounts/ghw-dev/projects/cokcok-client/builds"
+          echo "Play Console: https://play.google.com/console"
+          echo ""
+          echo "📝 Release status: DRAFT — Click 'Start rollout' in Play Console to publish"
+          echo "⏰ Internal Testing will be available to testers within 5-10 minutes after rollout"

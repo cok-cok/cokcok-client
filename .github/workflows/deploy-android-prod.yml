@@ -1,0 +1,199 @@
+name: "[Android] Deploy to Production"
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip-rel-check:
+        description: "Skip rel build verification (emergency override)"
+        type: boolean
+        default: false
+      force-concurrent-release:
+        description: "Allow this release to run while another release/* PR is open (emergency only)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate branch
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          echo "🔍 Validating branch: $BRANCH"
+
+          if [[ "$BRANCH" == main ]] || [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" =~ ^hotfix/ ]]; then
+            echo "✅ Valid branch for production deployment"
+          else
+            echo "❌ Error: Production deployment only allowed from:"
+            echo "   - release/* branches (e.g., release/v1.0.0)"
+            echo "   - hotfix/* branches (e.g., hotfix/COKCOK-XXX)"
+            echo "   - main branch"
+            echo ""
+            echo "   Current branch: $BRANCH"
+            exit 1
+          fi
+
+      - name: Verify no other release in progress
+        if: startsWith(github.ref_name, 'release/') && inputs.force-concurrent-release != true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          OTHERS=$(gh pr list --base main --state open --repo "${{ github.repository }}" --json headRefName \
+            --jq '[.[] | select(.headRefName != "'"$BRANCH"'") | select(.headRefName | startswith("release/")) | .headRefName] | join(", ")')
+          if [[ -n "$OTHERS" ]]; then
+            echo "❌ Another release branch has an open PR to main: $OTHERS"
+            echo ""
+            echo "Wait until it's merged before continuing this release."
+            echo "Or re-trigger with force-concurrent-release=true (not recommended)."
+            exit 1
+          fi
+          echo "✅ No other release in progress"
+
+      - name: Verify main is not ahead
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "✅ Deploying from main, ahead check skipped"
+            exit 0
+          fi
+          AHEAD=$(gh api "repos/${{ github.repository }}/compare/$BRANCH...main" --jq '.ahead_by')
+          if [[ "$AHEAD" -gt 0 ]]; then
+            echo "❌ main has $AHEAD commit(s) not in $BRANCH"
+            echo "   Sync main into $BRANCH first (merge or rebase) to avoid regressing hotfixes."
+            exit 1
+          fi
+          echo "✅ main has no commits ahead of $BRANCH"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Force npm registry (security)
+        run: |
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "✅ Using official npm registry only"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Verify rel build exists for this commit
+        if: ${{ inputs.skip-rel-check != true }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "⚠️  Deploying from main, rel build check skipped (hotfix path)"
+            exit 0
+          fi
+          SHA="${{ github.sha }}"
+          BUILD_ID=$(eas build:list --platform android --status finished --limit 30 --non-interactive --json | \
+            jq -r --arg sha "$SHA" '.[] | select(.gitCommitHash == $sha and (.buildProfile == "rel" or .profile == "rel")) | .id' | head -1)
+          if [[ -z "$BUILD_ID" ]]; then
+            echo "❌ No successful rel build found for commit $SHA"
+            echo "   Run rel deploy on this commit first, or re-trigger with skip-rel-check=true (emergency only)"
+            exit 1
+          fi
+          echo "✅ Rel build verified: $BUILD_ID (commit $SHA)"
+
+      - name: Restore Google Service Account key
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" | base64 -d > ./google-service-account.json
+          echo "✅ Service account key restored"
+
+      - name: Build Android (Prod)
+        run: yarn android:build:prod:ci
+
+      - name: Submit to Production (Prod)
+        run: eas submit --platform android --latest --profile prod --non-interactive
+
+      - name: Cleanup secret file
+        if: always()
+        run: rm -f ./google-service-account.json
+
+      - name: Sync to main (open or update PR)
+        if: success() && github.ref_name != 'main'
+        env:
+          GH_TOKEN: ${{ secrets.PR_AUTOMATION_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          REPO="${{ github.repository }}"
+          STAGE_PLATFORM="Android Prod"
+
+          AHEAD=$(gh api "repos/$REPO/compare/main...$BRANCH" --jq '.ahead_by')
+          if [[ "$AHEAD" == "0" ]]; then
+            echo "✅ $BRANCH already in main, no PR needed"
+            exit 0
+          fi
+
+          PR_NUM=$(gh pr list --base main --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [[ -n "$PR_NUM" ]]; then
+            echo "ℹ️  PR #$PR_NUM already open for $BRANCH → main"
+            gh pr comment "$PR_NUM" --body "✅ [$STAGE_PLATFORM] also succeeded (commit \`${{ github.sha }}\`)"
+          else
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore: merge $BRANCH to main" \
+              --body "$(cat <<EOF
+          Automated PR after deployment.
+
+          - Branch: \`$BRANCH\`
+          - Commit: \`${{ github.sha }}\`
+          - 첫 트리거: $STAGE_PLATFORM
+          - 작성자: ${{ github.actor }}
+
+          ⚠️ 이 PR은 한 platform·단계 성공으로 자동 생성됩니다.
+          다른 platform·단계가 같은 commit에서 성공했는지 확인 후 머지하세요.
+          필요한 만큼만 진행해도 됩니다 (예: 0.1.0은 rel까지만).
+
+          머지하면 \`develop\`도 자동 동기화됩니다.
+          EOF
+          )"
+          fi
+
+      - name: Deploy summary
+        run: |
+          echo "✅ Android Production build completed and submitted to Production track"
+          echo "🤖 Platform: Android"
+          echo "🏷️ Profile: prod"
+          echo "🎯 Track: production"
+          echo "🔖 Branch: ${{ github.ref_name }}"
+          echo "📦 Commit: ${{ github.sha }}"
+          echo ""
+          echo "Build logs: https://expo.dev/accounts/ghw-dev/projects/cokcok-client/builds"
+          echo "Play Console: https://play.google.com/console"
+          echo ""
+          echo "⏰ Production track will be available in 5-10 minutes"
+          echo "⚠️ Manual step required: Submit for review in Play Console (release status: DRAFT)"
