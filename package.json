@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "index.ts",
   "scripts": {
+    "prepare": "husky",
     "start": "expo start --port 8082",
     "android": "expo run:android --port 8082",
     "ios": "expo run:ios --port 8082"
@@ -13,7 +14,10 @@
     "react-native": "0.81.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@types/react": "~19.1.10",
+    "husky": "^9.1.7",
     "typescript": "5.9.2"
   },
   "private": true,
