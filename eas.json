@@ -1,0 +1,97 @@
+{
+  "cli": {
+    "version": ">= 18.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "dev": {
+      "autoIncrement": true,
+      "ios": {
+        "simulator": false,
+        "distribution": "store",
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "resourceClass": "medium"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENV": "dev",
+        "NPM_CONFIG_REGISTRY": "https://registry.npmjs.org/"
+      }
+    },
+    "rel": {
+      "autoIncrement": true,
+      "ios": {
+        "simulator": false,
+        "distribution": "store",
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "resourceClass": "medium"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENV": "rel",
+        "NPM_CONFIG_REGISTRY": "https://registry.npmjs.org/"
+      }
+    },
+    "prod": {
+      "autoIncrement": true,
+      "ios": {
+        "simulator": false,
+        "distribution": "store",
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "resourceClass": "medium"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENV": "prod",
+        "NPM_CONFIG_REGISTRY": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "submit": {
+    "dev": {
+      "ios": {
+        "appleId": "ghw0926@naver.com",
+        "ascAppId": "6766532529",
+        "appleTeamId": "7BH7VSKN3U"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": false
+      }
+    },
+    "rel": {
+      "ios": {
+        "appleId": "ghw0926@naver.com",
+        "ascAppId": "6766532529",
+        "appleTeamId": "7BH7VSKN3U"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "beta",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": false
+      }
+    },
+    "prod": {
+      "ios": {
+        "appleId": "ghw0926@naver.com",
+        "ascAppId": "6766532529",
+        "appleTeamId": "7BH7VSKN3U"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "production",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": true
+      }
+    }
+  }
+}
