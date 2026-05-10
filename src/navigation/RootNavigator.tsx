@@ -1,0 +1,26 @@
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import LoginPage from '../pages/LoginPage';
+import MyPage from '../pages/MyPage';
+import MyRecipeListPage from '../pages/MyRecipeListPage';
+import RecipeDetailPage from '../pages/RecipeDetailPage';
+import RecipeFormPage from '../pages/RecipeFormPage';
+import SettingsPage from '../pages/SettingsPage';
+import SignupPage from '../pages/SignupPage';
+import type { RootStackParamList } from './types';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function RootNavigator() {
+  return (
+    <Stack.Navigator id={undefined} initialRouteName="MyRecipeList">
+      <Stack.Screen name="Login" component={LoginPage} options={{ title: '로그인' }} />
+      <Stack.Screen name="Signup" component={SignupPage} options={{ title: '회원가입' }} />
+      <Stack.Screen name="MyRecipeList" component={MyRecipeListPage} options={{ title: '내 레시피' }} />
+      <Stack.Screen name="RecipeForm" component={RecipeFormPage} options={{ title: '레시피 작성' }} />
+      <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} options={{ title: '레시피 상세' }} />
+      <Stack.Screen name="MyPage" component={MyPage} options={{ title: '마이' }} />
+      <Stack.Screen name="Settings" component={SettingsPage} options={{ title: '설정' }} />
+    </Stack.Navigator>
+  );
+}
