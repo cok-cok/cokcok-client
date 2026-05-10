@@ -127,24 +127,6 @@ jobs:
           fi
           echo "✅ Rel build verified: $BUILD_ID (commit $SHA)"
 
-      - name: Setup Apple credentials
-        env:
-          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          KEY_DIR="$HOME/.appstoreconnect/private_keys"
-          KEY_PATH="$KEY_DIR/AuthKey_${APPLE_API_KEY_ID}.p8"
-          mkdir -p "$KEY_DIR"
-          printf '%s' "$APPLE_API_KEY_CONTENT" > "$KEY_PATH"
-          {
-            echo "EXPO_ASC_API_KEY_PATH=$KEY_PATH"
-            echo "EXPO_ASC_KEY_ID=$APPLE_API_KEY_ID"
-            echo "EXPO_ASC_ISSUER_ID=$APPLE_API_ISSUER_ID"
-            echo "EXPO_APPLE_TEAM_ID=$APPLE_TEAM_ID"
-          } >> "$GITHUB_ENV"
-
       - name: Build iOS (Prod)
         run: yarn ios:build:prod:ci
 
