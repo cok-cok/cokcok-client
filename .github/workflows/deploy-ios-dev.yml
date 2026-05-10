@@ -56,30 +56,29 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Create Apple API Key file
+      - name: Setup Apple credentials
+        env:
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "${{ secrets.APPLE_API_KEY_CONTENT }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          KEY_PATH="$KEY_DIR/AuthKey_${APPLE_API_KEY_ID}.p8"
+          mkdir -p "$KEY_DIR"
+          printf '%s' "$APPLE_API_KEY_CONTENT" > "$KEY_PATH"
+          {
+            echo "EXPO_ASC_API_KEY_PATH=$KEY_PATH"
+            echo "EXPO_ASC_KEY_ID=$APPLE_API_KEY_ID"
+            echo "EXPO_ASC_ISSUER_ID=$APPLE_API_ISSUER_ID"
+            echo "EXPO_APPLE_TEAM_ID=$APPLE_TEAM_ID"
+          } >> "$GITHUB_ENV"
 
       - name: Build iOS (Dev)
         run: yarn ios:build:dev:ci
-        env:
-          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ""
-          EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          EXPO_APPLE_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          EXPO_ASC_API_KEY_PATH: ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
-          EXPO_ASC_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          EXPO_ASC_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
 
       - name: Submit to TestFlight (Dev)
         run: eas submit --platform ios --latest --profile dev --non-interactive
-        env:
-          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ""
-          EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          EXPO_APPLE_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          EXPO_ASC_API_KEY_PATH: ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
-          EXPO_ASC_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          EXPO_ASC_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
 
       - name: Deploy summary
         run: |
