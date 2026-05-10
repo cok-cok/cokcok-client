@@ -5,7 +5,10 @@
     "version": "0.0.1",
     "icon": "./assets/icon.png",
     "ios": {
-      "bundleIdentifier": "com.cokcok.client"
+      "bundleIdentifier": "com.cokcok.client",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.cokcok.client",
