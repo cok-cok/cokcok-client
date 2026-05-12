@@ -1,0 +1,33 @@
+import {
+  AlertCircle,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  EyeOff,
+  Image,
+  Plus,
+  Search,
+  Settings,
+  Trash,
+  User,
+  X,
+} from 'lucide-react-native';
+
+export const ICONS = {
+  alertCircle: AlertCircle,
+  check: Check,
+  chevronLeft: ChevronLeft,
+  chevronRight: ChevronRight,
+  clock: Clock,
+  eye: Eye,
+  eyeOff: EyeOff,
+  image: Image,
+  plus: Plus,
+  search: Search,
+  settings: Settings,
+  trash: Trash,
+  user: User,
+  x: X,
+} as const;
