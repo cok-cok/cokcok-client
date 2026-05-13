@@ -62,6 +62,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  hidden: { opacity: 0 },
+  spinnerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   fullWidth: { alignSelf: 'stretch' },
   iconLeft: { marginLeft: -6 },
   iconRight: { marginRight: -6 },
@@ -111,8 +122,30 @@ const sizeStyles = {
 } as const satisfies Record<ButtonSize, { container: ViewStyle; label: TextStyle }>;
 
 export const contentStyle = styles.content;
+export const contentRowStyle = styles.contentRow;
+export const hiddenStyle = styles.hidden;
+export const spinnerOverlayStyle = styles.spinnerOverlay;
 export const iconLeftStyle = styles.iconLeft;
 export const iconRightStyle = styles.iconRight;
+
+export const BUTTON_SPINNER_COLOR = {
+  primary: WHITE,
+  secondary: BRAND,
+  text: BRAND,
+  danger: WHITE,
+} as const satisfies Record<ButtonVariant, string>;
+
+export const BUTTON_SPINNER_SIZE = {
+  sm: 14,
+  md: 16,
+  lg: 20,
+} as const satisfies Record<ButtonSize, number>;
+
+export const BUTTON_HIT_SLOP = {
+  sm: 6,
+  md: 0,
+  lg: 0,
+} as const satisfies Record<ButtonSize, number>;
 
 type ContainerArgs = {
   variant: ButtonVariant;
