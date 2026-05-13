@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import {
   type NativeSyntheticEvent,
   Pressable,
@@ -32,30 +32,56 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const TYPE_DEFAULTS: Record<InputType, Partial<TextInputProps>> = {
   text: {},
-  email: { keyboardType: 'email-address', autoCapitalize: 'none', autoComplete: 'email' },
-  password: { autoCapitalize: 'none', autoComplete: 'password' },
-  number: { keyboardType: 'numeric' },
-  multiline: { multiline: true, textAlignVertical: 'top' },
+  email: {
+    keyboardType: 'email-address',
+    autoCapitalize: 'none',
+    autoComplete: 'email',
+    textContentType: 'emailAddress',
+    autoCorrect: false,
+    spellCheck: false,
+  },
+  password: {
+    autoCapitalize: 'none',
+    autoComplete: 'password',
+    textContentType: 'password',
+    autoCorrect: false,
+    spellCheck: false,
+  },
+  number: {
+    keyboardType: 'numeric',
+    autoCorrect: false,
+    spellCheck: false,
+  },
+  multiline: {
+    multiline: true,
+    textAlignVertical: 'top',
+  },
 };
 
-export function Input({
-  variant = 'outline',
-  size = 'md',
-  type = 'text',
-  label,
-  required,
-  helperText,
-  error,
-  iconLeft,
-  iconRight,
-  style,
-  inputStyle,
-  onFocus,
-  onBlur,
-  editable,
-  ...rest
-}: InputProps) {
-  const inputRef = useRef<TextInput>(null);
+export const Input = forwardRef<TextInput, InputProps>(function Input(
+  {
+    variant = 'outline',
+    size = 'md',
+    type = 'text',
+    label,
+    required,
+    helperText,
+    error,
+    iconLeft,
+    iconRight,
+    style,
+    inputStyle,
+    onFocus,
+    onBlur,
+    editable,
+    accessibilityLabel,
+    accessibilityHint,
+    accessibilityState,
+    ...rest
+  },
+  forwardedRef,
+) {
+  const internalRef = useRef<TextInput | null>(null);
   const [focused, setFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -65,6 +91,24 @@ export function Input({
   const isPassword = type === 'password';
 
   const state = useInputStateAnimation({ variant, focused, error: isError, disabled });
+
+  const setRef = useCallback(
+    (node: TextInput | null) => {
+      internalRef.current = node;
+      if (typeof forwardedRef === 'function') {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    },
+    [forwardedRef],
+  );
+
+  useEffect(() => {
+    if (disabled && focused) {
+      internalRef.current?.blur();
+    }
+  }, [disabled, focused]);
 
   const handleFocus = useCallback(
     (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
@@ -83,14 +127,19 @@ export function Input({
   );
 
   const focusInput = useCallback(() => {
-    inputRef.current?.focus();
+    internalRef.current?.focus();
   }, []);
 
   const typeDefaults = TYPE_DEFAULTS[type];
   const secureTextEntry = isPassword && !passwordVisible;
 
   const resolvedIconRight = isPassword ? (
-    <Pressable onPress={() => setPasswordVisible((v) => !v)} hitSlop={8}>
+    <Pressable
+      onPress={() => setPasswordVisible((v) => !v)}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={passwordVisible ? '비밀번호 숨기기' : '비밀번호 보이기'}
+    >
       <Icon
         name={passwordVisible ? 'eyeOff' : 'eye'}
         size={20}
@@ -115,7 +164,7 @@ export function Input({
       >
         {iconLeft ? <View>{iconLeft}</View> : null}
         <TextInput
-          ref={inputRef}
+          ref={setRef}
           placeholderTextColor={PLACEHOLDER_COLOR}
           cursorColor={CURSOR_COLOR}
           selectionColor={SELECTION_COLOR}
@@ -125,6 +174,9 @@ export function Input({
           onFocus={handleFocus}
           onBlur={handleBlur}
           secureTextEntry={secureTextEntry}
+          accessibilityLabel={accessibilityLabel ?? label}
+          accessibilityHint={accessibilityHint ?? error ?? helperText}
+          accessibilityState={{ disabled, ...accessibilityState }}
           style={getInputStyle({ size, multiline: isMultiline, override: inputStyle })}
         />
         {resolvedIconRight ? <View>{resolvedIconRight}</View> : null}
@@ -135,4 +187,4 @@ export function Input({
       ) : null}
     </View>
   );
-}
+});
