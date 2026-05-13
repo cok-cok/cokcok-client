@@ -1,3 +1,5 @@
+import type { AccessibilityRole } from 'react-native';
+
 import type { ICONS } from './Icon.icons';
 
 export type IconName = keyof typeof ICONS;
@@ -7,4 +9,7 @@ export type IconProps = {
   size?: number;
   color?: string;
   strokeWidth?: number;
+  accessibilityLabel?: string;
+  accessibilityRole?: AccessibilityRole;
+  testID?: string;
 };
