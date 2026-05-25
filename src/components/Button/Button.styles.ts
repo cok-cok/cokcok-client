@@ -1,5 +1,6 @@
 import { type StyleProp, StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
 
+import type { SpinnerColor } from '../Spinner';
 import type { ButtonSize, ButtonVariant } from './Button.types';
 
 const BRAND = '#FD4C06';
@@ -12,18 +13,12 @@ const NORMAL_BG = '#F3F4F6';
 const NORMAL_LABEL = '#111827';
 
 export const BUTTON_SPINNER_COLOR = {
-  primary: WHITE,
-  secondary: BRAND,
-  text: BRAND,
-  danger: WHITE,
-  normal: NORMAL_LABEL,
-} as const satisfies Record<ButtonVariant, string>;
-
-export const BUTTON_SPINNER_SIZE = {
-  sm: 14,
-  md: 16,
-  lg: 20,
-} as const satisfies Record<ButtonSize, number>;
+  primary: 'white',
+  secondary: 'brand',
+  text: 'brand',
+  danger: 'white',
+  normal: 'black',
+} as const satisfies Record<ButtonVariant, SpinnerColor>;
 
 export const BUTTON_ICON_SIZE = {
   sm: 16,
@@ -41,6 +36,7 @@ const styles = StyleSheet.create({
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
   },
   hidden: { opacity: 0 },
