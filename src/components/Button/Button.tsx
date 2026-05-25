@@ -1,15 +1,15 @@
 import { forwardRef, useCallback, useState } from 'react';
-import { ActivityIndicator, type GestureResponderEvent, Pressable, Text, View } from 'react-native';
+import { type GestureResponderEvent, Pressable, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import * as Haptics from 'expo-haptics';
 
 import { IconSizeContext } from '../Icon';
+import { Spinner, SPINNER_TOTAL_WIDTH } from '../Spinner';
 import { useButtonPressAnimation } from './Button.animation';
 import {
   BUTTON_ICON_SIZE,
   BUTTON_SPINNER_COLOR,
-  BUTTON_SPINNER_SIZE,
   contentRowStyle,
   getContainerStyle,
   getLabelStyle,
@@ -115,7 +115,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
     >
       <View>
         <IconSizeContext.Provider value={iconSize}>
-          <View style={[contentRowStyle, isLoading && hiddenStyle]}>
+          <View style={[contentRowStyle, { minWidth: SPINNER_TOTAL_WIDTH[size] }, isLoading && hiddenStyle]}>
             {iconLeft ? <View style={label ? iconLeftStyle : undefined}>{iconLeft}</View> : null}
             {label ? (
               <Text style={getLabelStyle({ variant, size, disabled, override: labelStyle })}>{label}</Text>
@@ -125,7 +125,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         </IconSizeContext.Provider>
         {isLoading ? (
           <View style={spinnerOverlayStyle} pointerEvents="none">
-            <ActivityIndicator size={BUTTON_SPINNER_SIZE[size]} color={BUTTON_SPINNER_COLOR[variant]} />
+            <Spinner color={BUTTON_SPINNER_COLOR[variant]} size={size} />
           </View>
         ) : null}
       </View>

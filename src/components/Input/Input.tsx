@@ -1,6 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   type NativeSyntheticEvent,
   Pressable,
   Text,
@@ -12,6 +11,7 @@ import {
 import Animated from 'react-native-reanimated';
 
 import { Icon, IconSizeContext } from '../Icon';
+import { Spinner } from '../Spinner';
 import { useInputStateAnimation } from './Input.animation';
 import {
   bottomRowStyle,
@@ -28,7 +28,6 @@ import {
   ICON_DISABLED_COLOR,
   ICON_NEUTRAL_COLOR,
   INPUT_ICON_SIZE,
-  INPUT_SPINNER_SIZE,
   outerContainerStyle,
   PLACEHOLDER_COLOR,
   REQUIRED_MARK_COLOR,
@@ -173,7 +172,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
 
   let resolvedIconRight = iconRight;
   if (loading) {
-    resolvedIconRight = <ActivityIndicator size={INPUT_SPINNER_SIZE[size]} color={iconColor} />;
+    resolvedIconRight = <Spinner color="black" size={size} />;
   } else if (isPassword) {
     resolvedIconRight = (
       <Pressable

@@ -61,12 +61,6 @@ export const INPUT_ICON_SIZE = {
   lg: 20,
 } as const satisfies Record<InputSize, number>;
 
-export const INPUT_SPINNER_SIZE = {
-  sm: 14,
-  md: 16,
-  lg: 18,
-} as const satisfies Record<InputSize, number>;
-
 const styles = StyleSheet.create({
   outerContainer: { gap: 4 },
   rowWithTrailing: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
