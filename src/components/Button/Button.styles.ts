@@ -5,50 +5,31 @@ import type { ButtonSize, ButtonVariant } from './Button.types';
 const BRAND = '#FD4C06';
 const DANGER = '#DC2626';
 const WHITE = '#FFFFFF';
-const TRANSPARENT = 'transparent';
 const DISABLED_BG = '#E5E7EB';
 const DISABLED_BORDER = '#D1D5DB';
 const DISABLED_LABEL = '#9CA3AF';
+const NORMAL_BG = '#F3F4F6';
+const NORMAL_LABEL = '#111827';
 
-export const BUTTON_COLORS = {
-  primary: {
-    background: { active: BRAND, disabled: DISABLED_BG },
-    border: { active: TRANSPARENT, disabled: TRANSPARENT },
-    label: { active: WHITE, disabled: DISABLED_LABEL },
-    shadowOpacity: { active: 0.12, disabled: 0 },
-    elevation: { active: 2, disabled: 0 },
-  },
-  secondary: {
-    background: { active: TRANSPARENT, disabled: TRANSPARENT },
-    border: { active: BRAND, disabled: DISABLED_BORDER },
-    label: { active: BRAND, disabled: DISABLED_LABEL },
-    shadowOpacity: { active: 0, disabled: 0 },
-    elevation: { active: 0, disabled: 0 },
-  },
-  text: {
-    background: { active: TRANSPARENT, disabled: TRANSPARENT },
-    border: { active: TRANSPARENT, disabled: TRANSPARENT },
-    label: { active: BRAND, disabled: DISABLED_LABEL },
-    shadowOpacity: { active: 0, disabled: 0 },
-    elevation: { active: 0, disabled: 0 },
-  },
-  danger: {
-    background: { active: DANGER, disabled: DISABLED_BG },
-    border: { active: TRANSPARENT, disabled: TRANSPARENT },
-    label: { active: WHITE, disabled: DISABLED_LABEL },
-    shadowOpacity: { active: 0.12, disabled: 0 },
-    elevation: { active: 2, disabled: 0 },
-  },
-} as const satisfies Record<
-  ButtonVariant,
-  {
-    background: { active: string; disabled: string };
-    border: { active: string; disabled: string };
-    label: { active: string; disabled: string };
-    shadowOpacity: { active: number; disabled: number };
-    elevation: { active: number; disabled: number };
-  }
->;
+export const BUTTON_SPINNER_COLOR = {
+  primary: WHITE,
+  secondary: BRAND,
+  text: BRAND,
+  danger: WHITE,
+  normal: NORMAL_LABEL,
+} as const satisfies Record<ButtonVariant, string>;
+
+export const BUTTON_SPINNER_SIZE = {
+  sm: 14,
+  md: 16,
+  lg: 20,
+} as const satisfies Record<ButtonSize, number>;
+
+export const BUTTON_ICON_SIZE = {
+  sm: 16,
+  md: 18,
+  lg: 20,
+} as const satisfies Record<ButtonSize, number>;
 
 const styles = StyleSheet.create({
   base: {
@@ -57,10 +38,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
-  content: {
+  contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  hidden: { opacity: 0 },
+  spinnerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fullWidth: { alignSelf: 'stretch' },
   iconLeft: { marginLeft: -6 },
@@ -72,21 +59,36 @@ const styles = StyleSheet.create({
   },
 
   v_primary: {
+    backgroundColor: BRAND,
     shadowColor: BRAND,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
   v_secondary: {
     borderWidth: 1.5,
+    borderColor: BRAND,
   },
-  v_text: {},
   v_danger: {
+    backgroundColor: DANGER,
     shadowColor: DANGER,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
+  v_normal: {
+    backgroundColor: NORMAL_BG,
+  },
 
-  label_v_text: { fontWeight: '600' },
+  label_v_primary: { color: WHITE },
+  label_v_secondary: { color: BRAND },
+  label_v_text: { fontWeight: '600', color: BRAND },
+  label_v_danger: { color: WHITE },
+  label_v_normal: { color: NORMAL_LABEL },
+
+  d_primary: { backgroundColor: DISABLED_BG, shadowOpacity: 0, elevation: 0 },
+  d_secondary: { borderColor: DISABLED_BORDER },
+  d_danger: { backgroundColor: DISABLED_BG, shadowOpacity: 0, elevation: 0 },
+  d_normal: { backgroundColor: DISABLED_BG },
+  d_label: { color: DISABLED_LABEL },
 
   s_sm: { paddingVertical: 7, paddingHorizontal: 14 },
   s_md: { paddingVertical: 11, paddingHorizontal: 18 },
@@ -97,20 +99,45 @@ const styles = StyleSheet.create({
   label_s_lg: { fontSize: 17 },
 });
 
-const variantStaticStyles = {
-  primary: { container: styles.v_primary },
-  secondary: { container: styles.v_secondary },
-  text: { container: styles.v_text, label: styles.label_v_text },
-  danger: { container: styles.v_danger },
-} as const satisfies Record<ButtonVariant, { container: ViewStyle; label?: TextStyle }>;
+const variantContainerStyles = {
+  primary: styles.v_primary,
+  secondary: styles.v_secondary,
+  text: undefined,
+  danger: styles.v_danger,
+  normal: styles.v_normal,
+} as const satisfies Record<ButtonVariant, ViewStyle | undefined>;
 
-const sizeStyles = {
-  sm: { container: styles.s_sm, label: styles.label_s_sm },
-  md: { container: styles.s_md, label: styles.label_s_md },
-  lg: { container: styles.s_lg, label: styles.label_s_lg },
-} as const satisfies Record<ButtonSize, { container: ViewStyle; label: TextStyle }>;
+const variantLabelStyles = {
+  primary: styles.label_v_primary,
+  secondary: styles.label_v_secondary,
+  text: styles.label_v_text,
+  danger: styles.label_v_danger,
+  normal: styles.label_v_normal,
+} as const satisfies Record<ButtonVariant, TextStyle>;
 
-export const contentStyle = styles.content;
+const variantDisabledStyles = {
+  primary: styles.d_primary,
+  secondary: styles.d_secondary,
+  text: undefined,
+  danger: styles.d_danger,
+  normal: styles.d_normal,
+} as const satisfies Record<ButtonVariant, ViewStyle | undefined>;
+
+const sizeContainerStyles = {
+  sm: styles.s_sm,
+  md: styles.s_md,
+  lg: styles.s_lg,
+} as const satisfies Record<ButtonSize, ViewStyle>;
+
+const sizeLabelStyles = {
+  sm: styles.label_s_sm,
+  md: styles.label_s_md,
+  lg: styles.label_s_lg,
+} as const satisfies Record<ButtonSize, TextStyle>;
+
+export const contentRowStyle = styles.contentRow;
+export const hiddenStyle = styles.hidden;
+export const spinnerOverlayStyle = styles.spinnerOverlay;
 export const iconLeftStyle = styles.iconLeft;
 export const iconRightStyle = styles.iconRight;
 
@@ -118,15 +145,23 @@ type ContainerArgs = {
   variant: ButtonVariant;
   size: ButtonSize;
   fullWidth?: boolean;
+  disabled?: boolean | null;
   override?: StyleProp<ViewStyle>;
 };
 
-export function getContainerStyle({ variant, size, fullWidth, override }: ContainerArgs): StyleProp<ViewStyle> {
+export function getContainerStyle({
+  variant,
+  size,
+  fullWidth,
+  disabled,
+  override,
+}: ContainerArgs): StyleProp<ViewStyle> {
   return [
     styles.base,
-    variantStaticStyles[variant].container,
-    sizeStyles[size].container,
+    variantContainerStyles[variant],
+    sizeContainerStyles[size],
     fullWidth && styles.fullWidth,
+    disabled && variantDisabledStyles[variant],
     override,
   ];
 }
@@ -134,10 +169,16 @@ export function getContainerStyle({ variant, size, fullWidth, override }: Contai
 type LabelArgs = {
   variant: ButtonVariant;
   size: ButtonSize;
+  disabled?: boolean | null;
   override?: StyleProp<TextStyle>;
 };
 
-export function getLabelStyle({ variant, size, override }: LabelArgs): StyleProp<TextStyle> {
-  const variantLabel = 'label' in variantStaticStyles[variant] ? variantStaticStyles[variant].label : undefined;
-  return [styles.label, variantLabel, sizeStyles[size].label, override];
+export function getLabelStyle({ variant, size, disabled, override }: LabelArgs): StyleProp<TextStyle> {
+  return [
+    styles.label,
+    variantLabelStyles[variant],
+    sizeLabelStyles[size],
+    disabled && styles.d_label,
+    override,
+  ];
 }

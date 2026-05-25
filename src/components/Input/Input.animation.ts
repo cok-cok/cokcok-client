@@ -1,22 +1,33 @@
-import { useEffect } from 'react';
-import { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useEffect, useRef } from 'react';
+import {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { INPUT_COLORS } from './Input.styles';
 import type { InputVariant } from './Input.types';
 
 const TIMING = { duration: 180 };
+const SHAKE_TIMING = { duration: 60 };
+const SHAKE_OFFSETS = [-6, 6, -4, 4, -2, 0] as const;
 
 type StateArgs = {
   variant: InputVariant;
   focused: boolean;
   error: boolean;
   disabled: boolean;
+  shakeOnError?: boolean;
 };
 
-export function useInputStateAnimation({ variant, focused, error, disabled }: StateArgs) {
+export function useInputStateAnimation({ variant, focused, error, disabled, shakeOnError }: StateArgs) {
   const focusProgress = useSharedValue(focused ? 1 : 0);
   const errorProgress = useSharedValue(error ? 1 : 0);
   const disabledProgress = useSharedValue(disabled ? 1 : 0);
+  const shakeOffset = useSharedValue(0);
+  const prevErrorRef = useRef(error);
 
   useEffect(() => {
     focusProgress.value = withTiming(focused ? 1 : 0, TIMING);
@@ -24,7 +35,13 @@ export function useInputStateAnimation({ variant, focused, error, disabled }: St
 
   useEffect(() => {
     errorProgress.value = withTiming(error ? 1 : 0, TIMING);
-  }, [error, errorProgress]);
+    if (shakeOnError && error && !prevErrorRef.current) {
+      shakeOffset.value = withSequence(
+        ...SHAKE_OFFSETS.map((offset) => withTiming(offset, SHAKE_TIMING)),
+      );
+    }
+    prevErrorRef.current = error;
+  }, [error, errorProgress, shakeOnError, shakeOffset]);
 
   useEffect(() => {
     disabledProgress.value = withTiming(disabled ? 1 : 0, TIMING);
@@ -43,7 +60,11 @@ export function useInputStateAnimation({ variant, focused, error, disabled }: St
     border = interpolateColor(errorProgress.value, [0, 1], [border, containerColors.border.error]);
     border = interpolateColor(disabledProgress.value, [0, 1], [border, containerColors.border.disabled]);
 
-    return { backgroundColor: bg, borderColor: border };
+    return {
+      backgroundColor: bg,
+      borderColor: border,
+      transform: [{ translateX: shakeOffset.value }],
+    };
   });
 
   const labelColors = INPUT_COLORS.label;

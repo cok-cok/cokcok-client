@@ -1,7 +1,33 @@
+import { useContext } from 'react';
+import { View } from 'react-native';
+
+import { IconSizeContext } from './Icon.context';
 import { ICONS } from './Icon.icons';
 import type { IconProps } from './Icon.types';
 
-export function Icon({ name, size = 20, color, strokeWidth }: IconProps) {
+export function Icon({
+  name,
+  size,
+  color,
+  strokeWidth,
+  accessibilityLabel,
+  accessibilityRole,
+  testID,
+}: IconProps) {
+  const contextSize = useContext(IconSizeContext);
   const LucideComponent = ICONS[name];
-  return <LucideComponent size={size} color={color} strokeWidth={strokeWidth} />;
+  const finalSize = size ?? contextSize ?? 20;
+  const isDecorative = !accessibilityLabel;
+
+  return (
+    <View
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={accessibilityRole ?? (isDecorative ? 'none' : 'image')}
+      accessibilityElementsHidden={isDecorative}
+      importantForAccessibility={isDecorative ? 'no-hide-descendants' : 'auto'}
+      testID={testID}
+    >
+      <LucideComponent size={finalSize} color={color} strokeWidth={strokeWidth} />
+    </View>
+  );
 }

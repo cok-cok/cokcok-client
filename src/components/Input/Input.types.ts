@@ -16,6 +16,11 @@ export type InputProps = Omit<TextInputProps, 'style'> & {
   error?: string;
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
+  loading?: boolean;
+  clearable?: boolean;
+  trailingAction?: ReactNode;
+  showCounter?: boolean;
+  shakeOnError?: boolean;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
 };

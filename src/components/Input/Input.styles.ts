@@ -15,7 +15,6 @@ const LABEL_DISABLED = '#9CA3AF';
 const HELPER_DEFAULT = '#6B7280';
 const HELPER_DISABLED = '#9CA3AF';
 const TEXT_DEFAULT = '#111827';
-const TEXT_DISABLED = '#9CA3AF';
 const PLACEHOLDER = '#9CA3AF';
 const ICON_NEUTRAL = '#6B7280';
 const ICON_DISABLED = '#9CA3AF';
@@ -50,15 +49,38 @@ export const INPUT_COLORS = {
 };
 
 export const REQUIRED_MARK_COLOR = DANGER;
-export const TEXT_INPUT_COLOR = TEXT_DEFAULT;
-export const TEXT_INPUT_DISABLED_COLOR = TEXT_DISABLED;
 export const PLACEHOLDER_COLOR = PLACEHOLDER;
 export const ICON_NEUTRAL_COLOR = ICON_NEUTRAL;
 export const ICON_DISABLED_COLOR = ICON_DISABLED;
-export const CURSOR_COLOR = TEXT_DEFAULT;
+export const ERROR_COLOR = DANGER;
 export const SELECTION_COLOR = TEXT_DEFAULT;
 
+export const INPUT_ICON_SIZE = {
+  sm: 16,
+  md: 18,
+  lg: 20,
+} as const satisfies Record<InputSize, number>;
+
+export const INPUT_SPINNER_SIZE = {
+  sm: 14,
+  md: 16,
+  lg: 18,
+} as const satisfies Record<InputSize, number>;
+
 const styles = StyleSheet.create({
+  outerContainer: { gap: 4 },
+  rowWithTrailing: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  boxWrapper: { flex: 1, gap: 6 },
+  trailingActionWrapper: { justifyContent: 'flex-end' },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  errorIconWrapper: { marginRight: 2 },
+  helperContent: { flex: 1 },
+  counter: { textAlign: 'right' },
+
   container: { gap: 6 },
   box: {
     flexDirection: 'row',
@@ -79,7 +101,6 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   label: { fontWeight: '600' },
-  helper: {},
 
   v_outline: { borderWidth: 1.5, borderRadius: 10 },
   v_underline: { borderBottomWidth: 1.5, borderRadius: 0 },
@@ -89,17 +110,17 @@ const styles = StyleSheet.create({
   s_md: { paddingVertical: 10, paddingHorizontal: 14, minHeight: 44 },
   s_lg: { paddingVertical: 12, paddingHorizontal: 16, minHeight: 52 },
 
-  textInput_sm: { fontSize: 13 },
-  textInput_md: { fontSize: 15 },
-  textInput_lg: { fontSize: 17 },
+  textInput_s_sm: { fontSize: 13 },
+  textInput_s_md: { fontSize: 15 },
+  textInput_s_lg: { fontSize: 17 },
 
-  label_sm: { fontSize: 12 },
-  label_md: { fontSize: 13 },
-  label_lg: { fontSize: 14 },
+  label_s_sm: { fontSize: 12 },
+  label_s_md: { fontSize: 13 },
+  label_s_lg: { fontSize: 14 },
 
-  helper_sm: { fontSize: 11 },
-  helper_md: { fontSize: 12 },
-  helper_lg: { fontSize: 13 },
+  helper_s_sm: { fontSize: 11 },
+  helper_s_md: { fontSize: 12 },
+  helper_s_lg: { fontSize: 13 },
 });
 
 const variantBoxStyles = {
@@ -115,26 +136,32 @@ const sizeBoxStyles = {
 } as const satisfies Record<InputSize, ViewStyle>;
 
 const sizeInputStyles = {
-  sm: styles.textInput_sm,
-  md: styles.textInput_md,
-  lg: styles.textInput_lg,
+  sm: styles.textInput_s_sm,
+  md: styles.textInput_s_md,
+  lg: styles.textInput_s_lg,
 } as const satisfies Record<InputSize, TextStyle>;
 
 const sizeLabelStyles = {
-  sm: styles.label_sm,
-  md: styles.label_md,
-  lg: styles.label_lg,
+  sm: styles.label_s_sm,
+  md: styles.label_s_md,
+  lg: styles.label_s_lg,
 } as const satisfies Record<InputSize, TextStyle>;
 
 const sizeHelperStyles = {
-  sm: styles.helper_sm,
-  md: styles.helper_md,
-  lg: styles.helper_lg,
+  sm: styles.helper_s_sm,
+  md: styles.helper_s_md,
+  lg: styles.helper_s_lg,
 } as const satisfies Record<InputSize, TextStyle>;
 
 export const containerStyle = styles.container;
-export const labelBaseStyle = styles.label;
-export const helperBaseStyle = styles.helper;
+export const outerContainerStyle = styles.outerContainer;
+export const rowWithTrailingStyle = styles.rowWithTrailing;
+export const boxWrapperStyle = styles.boxWrapper;
+export const trailingActionWrapperStyle = styles.trailingActionWrapper;
+export const bottomRowStyle = styles.bottomRow;
+export const errorIconWrapperStyle = styles.errorIconWrapper;
+export const helperContentStyle = styles.helperContent;
+export const counterStyle = styles.counter;
 
 type BoxArgs = {
   variant: InputVariant;
@@ -161,5 +188,5 @@ export function getLabelStyle({ size }: { size: InputSize }): StyleProp<TextStyl
 }
 
 export function getHelperStyle({ size }: { size: InputSize }): StyleProp<TextStyle> {
-  return [styles.helper, sizeHelperStyles[size]];
+  return sizeHelperStyles[size];
 }
