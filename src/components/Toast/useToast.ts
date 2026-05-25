@@ -18,11 +18,10 @@ export function _registerToastAPI(api: ToastAPI | null) {
   registered = api;
 }
 
-const noop = () => {};
 const noopId = () => '';
 
 // 비-React 컨텍스트(예: api client)에서 import 해서 직접 호출용 싱글톤.
-// ToastProvider가 마운트 전이면 no-op.
+// ToastProvider가 마운트 전이면 no-op (id 리턴은 '').
 export const toast: ToastAPI = {
   show: (input) => registered?.show(input) ?? noopId(),
   success: (m, o) => registered?.success(m, o) ?? noopId(),
@@ -30,6 +29,6 @@ export const toast: ToastAPI = {
   warning: (m, o) => registered?.warning(m, o) ?? noopId(),
   info: (m, o) => registered?.info(m, o) ?? noopId(),
   promise: (p, o) => (registered ? registered.promise(p, o) : p),
-  dismiss: (id) => (registered?.dismiss(id) ?? noop()),
-  dismissAll: () => (registered?.dismissAll() ?? noop()),
+  dismiss: (id) => registered?.dismiss(id),
+  dismissAll: () => registered?.dismissAll(),
 };
