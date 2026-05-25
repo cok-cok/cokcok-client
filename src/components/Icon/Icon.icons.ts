@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  AlertTriangle,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -7,16 +8,19 @@ import {
   Eye,
   EyeOff,
   Image,
+  Info,
   Plus,
   Search,
   Settings,
   Trash,
   User,
   X,
+  XCircle,
 } from 'lucide-react-native';
 
 export const ICONS = {
   alertCircle: AlertCircle,
+  alertTriangle: AlertTriangle,
   check: Check,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
@@ -24,10 +28,12 @@ export const ICONS = {
   eye: Eye,
   eyeOff: EyeOff,
   image: Image,
+  info: Info,
   plus: Plus,
   search: Search,
   settings: Settings,
   trash: Trash,
   user: User,
   x: X,
+  xCircle: XCircle,
 } as const;
