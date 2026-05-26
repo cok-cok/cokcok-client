@@ -6,7 +6,7 @@ import type { ToastType } from './Toast.types';
 const SUCCESS = '#16A34A';
 const ERROR = '#DC2626';
 const WARNING = '#F59E0B';
-const INFO = '#2563EB';
+const INFO = '#F97316'; // 확실한 주황 (Tailwind orange-500) — brand는 빨갛게 보여서 정보 톤에 부적합
 const DEFAULT_ACCENT = '#6B7280';
 
 const BG_LIGHT = '#FFFFFF';
