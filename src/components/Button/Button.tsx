@@ -1,12 +1,12 @@
 import { forwardRef, useCallback, useState } from 'react';
-import { type GestureResponderEvent, Pressable, Text, View } from 'react-native';
+import { type GestureResponderEvent, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import * as Haptics from 'expo-haptics';
 
 import { IconSizeContext } from '../Icon';
 import { Spinner, SPINNER_TOTAL_WIDTH } from '../Spinner';
-import { useButtonPressAnimation } from './Button.animation';
+import { useButtonPressAnimation, useButtonStateAnimation } from './Button.animation';
 import {
   BUTTON_ICON_SIZE,
   BUTTON_SPINNER_COLOR,
@@ -53,6 +53,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   ref,
 ) {
   const press = useButtonPressAnimation();
+  const state = useButtonStateAnimation({ variant, disabled });
   const [pendingPress, setPendingPress] = useState(false);
   const [pressed, setPressed] = useState(false);
 
@@ -108,7 +109,9 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: isBlocked, busy: isLoading, ...accessibilityState }}
       style={[
-        getContainerStyle({ variant, size, fullWidth, disabled, override: style }),
+        getContainerStyle({ variant, size, fullWidth }),
+        state.containerStyle,
+        style,
         press.animatedStyle,
         pressed && pressedStyle,
       ]}
@@ -118,7 +121,9 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
           <View style={[contentRowStyle, { minWidth: SPINNER_TOTAL_WIDTH[size] }, isLoading && hiddenStyle]}>
             {iconLeft ? <View style={label ? iconLeftStyle : undefined}>{iconLeft}</View> : null}
             {label ? (
-              <Text style={getLabelStyle({ variant, size, disabled, override: labelStyle })}>{label}</Text>
+              <Animated.Text style={[getLabelStyle({ variant, size }), state.labelStyle, labelStyle]}>
+                {label}
+              </Animated.Text>
             ) : null}
             {iconRight ? <View style={label ? iconRightStyle : undefined}>{iconRight}</View> : null}
           </View>
