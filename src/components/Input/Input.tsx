@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import {
   type NativeSyntheticEvent,
+  Platform,
   Pressable,
   Text,
   TextInput,
@@ -61,6 +62,10 @@ const TYPE_DEFAULTS: Record<InputType, Partial<TextInputProps>> = {
     textContentType: 'password',
     autoCorrect: false,
     spellCheck: false,
+    // 영문 키보드 고정으로 secureTextEntry 토글 시 IME 리셋(한/영 전환) 차단.
+    // iOS: ascii-capable로 한글 IME 비활성. Android: visible-password로 영문 키보드 강제
+    // (secureTextEntry=true와 함께 쓰면 가시화는 secureTextEntry가 우선해 정상적으로 가려짐)
+    keyboardType: Platform.OS === 'ios' ? 'ascii-capable' : 'visible-password',
   },
   number: {
     keyboardType: 'numeric',
