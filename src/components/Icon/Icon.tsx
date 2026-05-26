@@ -1,11 +1,11 @@
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { View } from 'react-native';
 
 import { IconSizeContext } from './Icon.context';
 import { ICONS } from './Icon.icons';
 import type { IconProps } from './Icon.types';
 
-export function Icon({
+function IconInner({
   name,
   size,
   color,
@@ -31,3 +31,7 @@ export function Icon({
     </View>
   );
 }
+
+// memo — 다수 위치에서 stable한 name/color/size로 호출됨. 부모 리렌더 차단으로
+// IconSizeContext consumption + lucide SVG 재계산 회피
+export const Icon = memo(IconInner);
