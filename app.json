@@ -4,6 +4,15 @@
     "slug": "cokcok-client",
     "version": "0.0.1",
     "icon": "./assets/icon.png",
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBFAF9"
+        }
+      ],
+      "expo-asset"
+    ],
     "ios": {
       "bundleIdentifier": "com.cokcok.client",
       "infoPlist": {

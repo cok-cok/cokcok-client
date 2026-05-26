@@ -4846,7 +4846,9 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-simple-import-sort: "npm:^13.0.0"
     expo: "npm:~54.0.32"
+    expo-asset: "npm:~12.0.13"
     expo-haptics: "npm:~15.0.8"
+    expo-splash-screen: "npm:~31.0.13"
     husky: "npm:^9.1.7"
     lucide-react-native: "npm:^1.14.0"
     prettier: "npm:^3.8.3"
@@ -6496,6 +6498,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-asset@npm:~12.0.13":
+  version: 12.0.13
+  resolution: "expo-asset@npm:12.0.13"
+  dependencies:
+    "@expo/image-utils": "npm:^0.8.8"
+    expo-constants: "npm:~18.0.13"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/5cc97d5e14042d43d6bbdaa6805da56e65ca91f0579df702f90c84e02100a305b1c1199492507b5e2db1cad641a04bcf87a324411dcdab394ca1ad62c2f98715
+  languageName: node
+  linkType: hard
+
 "expo-constants@npm:~18.0.12, expo-constants@npm:~18.0.13":
   version: 18.0.13
   resolution: "expo-constants@npm:18.0.13"
@@ -6582,6 +6598,17 @@ __metadata:
   version: 1.0.5
   resolution: "expo-server@npm:1.0.5"
   checksum: 10c0/0da974f733235d457f7ce51e5452f48f203378687f821bdab7159617a491c0192251423a17a7a3a118486e1cbfffff5d5ad31aeeedcf2cfad6412a1bd7e86877
+  languageName: node
+  linkType: hard
+
+"expo-splash-screen@npm:~31.0.13":
+  version: 31.0.13
+  resolution: "expo-splash-screen@npm:31.0.13"
+  dependencies:
+    "@expo/prebuild-config": "npm:^54.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/f2caf9ac41f35f4790ca8cbdecec7f5b453d95f2a31261bb4117c5bb0515547704568998e3c1dfbbad55dc41ec8d1221288a69d2a4a943c4cf4681f5b213e860
   languageName: node
   linkType: hard
 
