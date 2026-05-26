@@ -14,6 +14,12 @@ import { Icon, IconSizeContext } from '../Icon';
 import { Spinner } from '../Spinner';
 import { useInputStateAnimation } from './Input.animation';
 import {
+  CLEAR_INPUT_LABEL,
+  ERROR_ICON_LABEL,
+  PASSWORD_HIDE_LABEL,
+  PASSWORD_SHOW_LABEL,
+} from './Input.constants';
+import {
   bottomRowStyle,
   boxWrapperStyle,
   containerStyle,
@@ -179,14 +185,14 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         onPress={() => setPasswordVisible((v) => !v)}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel={passwordVisible ? '비밀번호 숨기기' : '비밀번호 보이기'}
+        accessibilityLabel={passwordVisible ? PASSWORD_HIDE_LABEL : PASSWORD_SHOW_LABEL}
       >
         <Icon name={passwordVisible ? 'eyeOff' : 'eye'} size={20} color={iconColor} />
       </Pressable>
     );
   } else if (clearable && hasValue && !disabled) {
     resolvedIconRight = (
-      <Pressable onPress={handleClear} hitSlop={8} accessibilityRole="button" accessibilityLabel="입력 지우기">
+      <Pressable onPress={handleClear} hitSlop={8} accessibilityRole="button" accessibilityLabel={CLEAR_INPUT_LABEL}>
         <Icon name="x" size={20} color={iconColor} />
       </Pressable>
     );
@@ -239,7 +245,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         <View style={bottomRowStyle}>
           {error ? (
             <View style={errorIconWrapperStyle}>
-              <Icon name="alertCircle" size={14} color={ERROR_COLOR} accessibilityLabel="에러" />
+              <Icon name="alertCircle" size={14} color={ERROR_COLOR} accessibilityLabel={ERROR_ICON_LABEL} />
             </View>
           ) : null}
           {error || helperText ? (

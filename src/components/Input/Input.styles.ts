@@ -8,8 +8,8 @@ const TRANSPARENT = 'transparent';
 
 const BORDER_DEFAULT = '#D1D5DB';
 const BORDER_DISABLED = '#E5E7EB';
-const BG_FILLED = '#F3F4F6';
-const BG_FILLED_DISABLED = '#F9FAFB';
+const BG_FILLED = '#FAFAFA';
+const BG_FILLED_DISABLED = '#F4F4F5';
 const LABEL_DEFAULT = '#374151';
 const LABEL_DISABLED = '#9CA3AF';
 const HELPER_DEFAULT = '#6B7280';
@@ -98,7 +98,19 @@ const styles = StyleSheet.create({
 
   v_outline: { borderWidth: 1.5, borderRadius: 10 },
   v_underline: { borderBottomWidth: 1.5, borderRadius: 0 },
-  v_filled: { borderWidth: 1.5, borderRadius: 10 },
+  v_filled: {
+    borderWidth: 1.5,
+    borderRadius: 10,
+    // 흰색에 가까운 bg가 페이지 bg와 잘 안 구분돼서 살짝의 elevation 추가.
+    // iOS는 shadowRadius로 부드럽게 퍼지지만, Android elevation은 spread 조절이 안 됨.
+    // Android 12+ 부터 shadowColor의 알파가 반영돼서 옅게 보이고, elevation 3 정도로
+    // 올리면 spread가 좀 더 살아남.
+    shadowColor: 'rgba(0, 0, 0, 0.5)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
 
   s_sm: { paddingVertical: 8, paddingHorizontal: 12, minHeight: 36 },
   s_md: { paddingVertical: 10, paddingHorizontal: 14, minHeight: 44 },
