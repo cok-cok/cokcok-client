@@ -1,4 +1,4 @@
-import { isValidElement, useCallback, useEffect, useRef, useState } from 'react';
+import { isValidElement, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS } from 'react-native-reanimated';
@@ -42,7 +42,7 @@ type Props = {
   reduceMotion: boolean;
 };
 
-export function Toast({ item, stackIndex, isFront, onRemove, onMeasure, reduceMotion }: Props) {
+function ToastInner({ item, stackIndex, isFront, onRemove, onMeasure, reduceMotion }: Props) {
   const { animatedStyle, dragY, exit, shadowStyle, swipeDismiss } = useToastAnimation({
     position: item.position,
     stackIndex,
@@ -91,28 +91,33 @@ export function Toast({ item, stackIndex, isFront, onRemove, onMeasure, reduceMo
     }
   }, [item._dismissing, triggerExit]);
 
-  // 뒤로 밀린 토스트(isFront=false)는 시간 멈춤 — 앞으로 와야만 timer 시작
+  // 뒤로 밀린 토스트(isFront=false)는 시간 멈춤 — 앞으로 와야만 timer 시작.
+  // _resetKey 변경 시(dedup) timer 재시작.
   useEffect(() => {
     if (!isFront || item.duration === Infinity || paused) return;
     const timer = setTimeout(triggerExit, item.duration);
     return () => clearTimeout(timer);
-  }, [isFront, item.duration, item.id, paused, triggerExit]);
+  }, [isFront, item.duration, item.id, item._resetKey, paused, triggerExit]);
 
-  const pan = Gesture.Pan()
-    .enabled(isFront)
-    .onUpdate((e) => {
-      dragY.value = e.translationY;
-    })
-    .onEnd((e) => {
-      const towardAway = item.position === 'top' ? -1 : 1;
-      const movedAway = e.translationY * towardAway > SWIPE_DISMISS_DISTANCE;
-      const flickedAway = e.velocityY * towardAway > SWIPE_DISMISS_VELOCITY;
-      if (movedAway || flickedAway) {
-        runOnJS(triggerSwipeExit)();
-      } else {
-        dragY.value = 0;
-      }
-    });
+  const pan = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(isFront)
+        .onUpdate((e) => {
+          dragY.value = e.translationY;
+        })
+        .onEnd((e) => {
+          const towardAway = item.position === 'top' ? -1 : 1;
+          const movedAway = e.translationY * towardAway > SWIPE_DISMISS_DISTANCE;
+          const flickedAway = e.velocityY * towardAway > SWIPE_DISMISS_VELOCITY;
+          if (movedAway || flickedAway) {
+            runOnJS(triggerSwipeExit)();
+          } else {
+            dragY.value = 0;
+          }
+        }),
+    [isFront, item.position, dragY, triggerSwipeExit],
+  );
 
   const accent = TOAST_ACCENT_COLOR[item.type];
   const iconNode = (() => {
@@ -174,3 +179,7 @@ export function Toast({ item, stackIndex, isFront, onRemove, onMeasure, reduceMo
     </GestureDetector>
   );
 }
+
+// React.memo로 ToastHost의 잦은 리렌더(새 토스트 push, stack 변동) 시 prop이 동일한
+// 토스트의 재실행 차단 — 연속 push 시 성능 최적화
+export const Toast = memo(ToastInner);

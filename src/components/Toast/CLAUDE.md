@@ -68,7 +68,7 @@ type ToastInput = {
 |---|---|---|---|---|---|
 | `default` | (없음) | `#6B7280` (gray-500) | bottom | - | polite |
 | `success` | `check` | `#16A34A` (green-600) | bottom | Success | polite |
-| `info` | `info` | `#2563EB` (blue-600) | bottom | - | polite |
+| `info` | `info` | `#F97316` (orange-500) | bottom | - | polite |
 | `warning` | `alertTriangle` | `#F59E0B` (amber-500) | top | Warning | assertive |
 | `error` | `xCircle` | `#DC2626` (red-600) | top | Error | assertive |
 
@@ -219,6 +219,7 @@ Button 컴포넌트(variant="text", size="sm") 재사용. 누르면:
 - 새 토스트는 newest=front (stackIndex 0). 기존 토스트들이 뒤로 밀림 (1, 2, ...).
 - 뒤 토스트는 timer 멈춤 — 앞으로 와야만 시작.
 - 뒤 토스트는 인터랙션 비활성 (`pointerEvents: 'none'`, `Pressable.disabled`, `Gesture.enabled(false)`).
+- **Dedup**: 사라지지 않은(`!_dismissing`) 토스트와 `type` / `position` / `message` / `title` / `description` 이 모두 같고 양쪽 모두 `action` 없으면 새로 안 만들고 **기존 토스트의 timer를 reset** (내부 `_resetKey` 증가 → Toast의 timer useEffect 재실행). `upsert` 리턴 id는 기존 토스트의 id. 스팸 클릭 시 mount + stack reflow 비용 회피.
 
 ### 시각
 

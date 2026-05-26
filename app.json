@@ -12,6 +12,7 @@
     },
     "android": {
       "package": "com.cokcok.client",
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FF4500"

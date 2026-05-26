@@ -59,12 +59,40 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const upsert = useCallback((input: ToastInput): string => {
     const item = toItem(input);
+    let resolvedId = item.id;
     setItems((prev) => {
+      // 명시적 id로 들어오면 upsert (promise 패턴)
       const idx = prev.findIndex((i) => i.id === item.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = item;
         return next;
+      }
+      // dedup — 사라지지 않은 동일 내용 토스트가 있으면 새로 만들지 않고 timer만 reset.
+      // 스팸 클릭 시 새 mount + stack reflow 회피해서 성능 ↑.
+      // action 있는 토스트는 매번 다른 의도일 수 있어 dedup 제외.
+      if (!item.action) {
+        const dupIdx = prev.findIndex(
+          (i) =>
+            !i._dismissing &&
+            !i.action &&
+            i.type === item.type &&
+            i.position === item.position &&
+            i.message === item.message &&
+            i.title === item.title &&
+            i.description === item.description,
+        );
+        if (dupIdx >= 0) {
+          const next = [...prev];
+          const existing = next[dupIdx];
+          next[dupIdx] = {
+            ...existing,
+            duration: item.duration,
+            _resetKey: (existing._resetKey ?? 0) + 1,
+          };
+          resolvedId = existing.id;
+          return next;
+        }
       }
       const next = [...prev, item];
       // 큐 한도 초과 시 같은 position의 가장 오래된 것부터 제거
@@ -74,7 +102,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       }
       return next;
     });
-    return item.id;
+    return resolvedId;
   }, []);
 
   // exit 애니메이션 끝난 후 실제로 state에서 제거 (Toast 컴포넌트 내부에서 호출)
