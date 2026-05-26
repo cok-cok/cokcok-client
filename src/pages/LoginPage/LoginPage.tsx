@@ -5,8 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { PhoneFrameBackground } from '../../components/PhoneFrameBackground';
 import type { RootStackParamList } from '../../navigation/types';
-import { LoginBackground } from './LoginBackground';
 import { LoginForm } from './LoginForm';
 import { LoginHeading } from './LoginHeading';
 import { LoginLinks } from './LoginLinks';
@@ -14,6 +14,8 @@ import { useEntranceAnimation, useKeyboardPadding } from './LoginPage.animation'
 import { styles } from './LoginPage.styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+
+const BG_SOURCE = require('../../../assets/login-bg.png');
 
 export default function LoginPage({ navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -31,23 +33,24 @@ export default function LoginPage({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <LoginBackground entranceStyle={bgStyle} onLoad={handleBgLoaded} />
-      <Animated.View style={[styles.whiteOverlay, overlayStyle]} pointerEvents="none" />
+      <PhoneFrameBackground source={BG_SOURCE} bgEntranceStyle={bgStyle} onBgLoad={handleBgLoaded}>
+        <Animated.View style={[styles.whiteOverlay, overlayStyle]} pointerEvents="none" />
 
-      <Animated.View style={[styles.flex, keyboardPadStyle]}>
-        <ScrollView
-          contentContainerStyle={[
-            styles.scroll,
-            { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
-          ]}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Pressable style={styles.dismissOverlay} onPress={handleDismiss} />
-          <LoginHeading entranceStyle={contentStyle} onLogoLoad={handleLogoLoaded} />
-          <LoginForm entranceStyle={contentStyle} onSuccess={handleLoginSuccess} />
-          <LoginLinks entranceStyle={contentStyle} onSignupPress={handleSignupPress} />
-        </ScrollView>
-      </Animated.View>
+        <Animated.View style={[styles.flex, keyboardPadStyle]}>
+          <ScrollView
+            contentContainerStyle={[
+              styles.scroll,
+              { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+            ]}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Pressable style={styles.dismissOverlay} onPress={handleDismiss} />
+            <LoginHeading entranceStyle={contentStyle} onLogoLoad={handleLogoLoaded} />
+            <LoginForm entranceStyle={contentStyle} onSuccess={handleLoginSuccess} />
+            <LoginLinks entranceStyle={contentStyle} onSignupPress={handleSignupPress} />
+          </ScrollView>
+        </Animated.View>
+      </PhoneFrameBackground>
     </View>
   );
 }

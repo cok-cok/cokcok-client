@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
+import { PhoneFrameBackground } from '../../components/PhoneFrameBackground';
 import { CokcokLetters } from './CokcokLetters';
 import { useLoadingAnimation } from './LoadingPage.animation';
-import { BG_ASPECT_RATIO, EXIT_FADE_DURATION_MS } from './LoadingPage.constants';
+import { EXIT_FADE_DURATION_MS } from './LoadingPage.constants';
 import { styles } from './LoadingPage.styles';
 
 type Props = {
@@ -16,10 +16,9 @@ type Props = {
   onExitComplete: () => void;
 };
 
-export function LoadingPage({ splashHidden, bootstrapReady, onExitComplete }: Props) {
-  const { width: screenWidth } = useWindowDimensions();
-  const bgImageHeight = screenWidth / BG_ASPECT_RATIO;
+const BG_SOURCE = require('../../../assets/login-bg.png');
 
+export function LoadingPage({ splashHidden, bootstrapReady, onExitComplete }: Props) {
   const [bgImageLoaded, setBgImageLoaded] = useState(false);
   const [cycleCount, setCycleCount] = useState(0);
   const [exiting, setExiting] = useState(false);
@@ -57,19 +56,14 @@ export function LoadingPage({ splashHidden, bootstrapReady, onExitComplete }: Pr
       style={[styles.root, rootExitStyle]}
       pointerEvents={exiting ? 'none' : 'auto'}
     >
-      <Animated.View style={[styles.bgWrap, bgStyle]} pointerEvents="none">
-        <View>
-          <Animated.Image
-            source={require('../../../assets/login-bg.png')}
-            style={{ width: screenWidth, height: bgImageHeight }}
-            resizeMode="cover"
-            onLoad={handleBgImageLoaded}
-            onError={handleBgImageLoaded}
-          />
-        </View>
-      </Animated.View>
-      <Animated.View style={[styles.whiteOverlay, overlayStyle]} pointerEvents="none" />
-      <CokcokLetters containerStyle={lettersStyle} start={bgReady} onCycleEnd={handleCycleEnd} />
+      <PhoneFrameBackground
+        source={BG_SOURCE}
+        bgEntranceStyle={bgStyle}
+        onBgLoad={handleBgImageLoaded}
+      >
+        <Animated.View style={[styles.whiteOverlay, overlayStyle]} pointerEvents="none" />
+        <CokcokLetters containerStyle={lettersStyle} start={bgReady} onCycleEnd={handleCycleEnd} />
+      </PhoneFrameBackground>
     </Animated.View>
   );
 }
