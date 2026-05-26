@@ -14,7 +14,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <Stack.Navigator id={undefined} initialRouteName="MyRecipeList">
-      <Stack.Screen name="Login" component={LoginPage} options={{ title: '로그인' }} />
+      <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
       <Stack.Screen name="Signup" component={SignupPage} options={{ title: '회원가입' }} />
       <Stack.Screen name="MyRecipeList" component={MyRecipeListPage} options={{ title: '내 레시피' }} />
       <Stack.Screen name="RecipeForm" component={RecipeFormPage} options={{ title: '레시피 작성' }} />
