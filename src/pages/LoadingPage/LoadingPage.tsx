@@ -8,24 +8,30 @@ import { BG_ASPECT_RATIO, EXIT_FADE_DURATION_MS } from './LoadingPage.constants'
 import { styles } from './LoadingPage.styles';
 
 type Props = {
-  // App-level bootstrap이 끝났음을 알림 — 로직 게이트
+  // 네이티브 스플래시 dismiss 완료 (App에서 SplashScreen.hideAsync resolve 후 true)
+  splashHidden: boolean;
+  // App-level bootstrap 완료 — 로직 게이트
   bootstrapReady: boolean;
   // exit 페이드아웃까지 모두 끝났을 때 호출 — 부모가 LoadingPage를 unmount
   onExitComplete: () => void;
 };
 
-export function LoadingPage({ bootstrapReady, onExitComplete }: Props) {
+export function LoadingPage({ splashHidden, bootstrapReady, onExitComplete }: Props) {
   const { width: screenWidth } = useWindowDimensions();
   const bgImageHeight = screenWidth / BG_ASPECT_RATIO;
 
-  const [bgLoaded, setBgLoaded] = useState(false);
+  const [bgImageLoaded, setBgImageLoaded] = useState(false);
   const [cycleCount, setCycleCount] = useState(0);
   const [exiting, setExiting] = useState(false);
 
-  const handleBgLoaded = useCallback(() => setBgLoaded(true), []);
+  // 네이티브 스플래시가 사라진 뒤 + bg 이미지 로드 완료 → 시퀀스 시작.
+  // 스플래시 dismiss 전에 fade-in을 시작하면 스플래시에 가려 사용자가 못 봄.
+  const bgReady = splashHidden && bgImageLoaded;
+
+  const handleBgImageLoaded = useCallback(() => setBgImageLoaded(true), []);
   const handleCycleEnd = useCallback(() => setCycleCount((c) => c + 1), []);
 
-  // 시각 게이트(점프 1사이클 완료) + 로직 게이트(bootstrap 완료) 모두 만족 시 exit 트리거
+  // 시각 게이트(점프 1사이클 완료) + 로직 게이트(bootstrap 완료) 모두 만족 시 exit
   useEffect(() => {
     if (!exiting && cycleCount >= 1 && bootstrapReady) {
       setExiting(true);
@@ -41,8 +47,8 @@ export function LoadingPage({ bootstrapReady, onExitComplete }: Props) {
     return () => clearTimeout(t);
   }, [exiting, onExitComplete]);
 
-  const { overlayStyle, lettersStyle, rootExitStyle } = useLoadingAnimation({
-    start: bgLoaded,
+  const { bgStyle, overlayStyle, lettersStyle, rootExitStyle } = useLoadingAnimation({
+    bgReady,
     exiting,
   });
 
@@ -51,21 +57,19 @@ export function LoadingPage({ bootstrapReady, onExitComplete }: Props) {
       style={[styles.root, rootExitStyle]}
       pointerEvents={exiting ? 'none' : 'auto'}
     >
-      <View style={styles.bgWrap} pointerEvents="none">
-        <Animated.Image
-          source={require('../../../assets/login-bg.png')}
-          style={{ width: screenWidth, height: bgImageHeight }}
-          resizeMode="cover"
-          onLoad={handleBgLoaded}
-          onError={handleBgLoaded}
-        />
-      </View>
+      <Animated.View style={[styles.bgWrap, bgStyle]} pointerEvents="none">
+        <View>
+          <Animated.Image
+            source={require('../../../assets/login-bg.png')}
+            style={{ width: screenWidth, height: bgImageHeight }}
+            resizeMode="cover"
+            onLoad={handleBgImageLoaded}
+            onError={handleBgImageLoaded}
+          />
+        </View>
+      </Animated.View>
       <Animated.View style={[styles.whiteOverlay, overlayStyle]} pointerEvents="none" />
-      <CokcokLetters
-        containerStyle={lettersStyle}
-        start={bgLoaded}
-        onCycleEnd={handleCycleEnd}
-      />
+      <CokcokLetters containerStyle={lettersStyle} start={bgReady} onCycleEnd={handleCycleEnd} />
     </Animated.View>
   );
 }

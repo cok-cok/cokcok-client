@@ -27,6 +27,7 @@ async function loadAppData(): Promise<void> {
 
 type UseBootstrap = {
   showLoading: boolean;
+  splashHidden: boolean;
   bootstrapReady: boolean;
   reload: () => void;
   handleLoadingExitComplete: () => void;
@@ -37,6 +38,7 @@ export function useBootstrap(): UseBootstrap {
   const [bootstrapReady, setBootstrapReady] = useState(false);
   const [showLoading, setShowLoading] = useState(true);
   // 네이티브 스플래시는 한 번만 hide — 첫 부트스트랩 후 reload엔 다시 안 띄움
+  const [splashHidden, setSplashHidden] = useState(false);
   const splashHiddenRef = useRef(false);
 
   useEffect(() => {
@@ -52,7 +54,9 @@ export function useBootstrap(): UseBootstrap {
           splashHiddenRef.current = true;
           SplashScreen.setOptions({ fade: true, duration: 300 });
           await SplashScreen.hideAsync().catch(() => {});
+          if (!cancelled) setSplashHidden(true);
         }
+        // reload 시엔 splashHidden이 이미 true — 그대로 둠
 
         await loadAppData();
         if (cancelled) return;
@@ -78,5 +82,5 @@ export function useBootstrap(): UseBootstrap {
     setShowLoading(false);
   }, []);
 
-  return { showLoading, bootstrapReady, reload, handleLoadingExitComplete };
+  return { showLoading, splashHidden, bootstrapReady, reload, handleLoadingExitComplete };
 }

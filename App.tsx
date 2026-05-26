@@ -10,7 +10,7 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { LoadingPage } from './src/pages/LoadingPage';
 
 export default function App() {
-  const { showLoading, bootstrapReady, reload, handleLoadingExitComplete } = useBootstrap();
+  const { showLoading, splashHidden, bootstrapReady, reload, handleLoadingExitComplete } = useBootstrap();
   const bootstrapCtx = useMemo(() => ({ reload }), [reload]);
 
   return (
@@ -22,6 +22,7 @@ export default function App() {
               <RootNavigator />
               {showLoading ? (
                 <LoadingPage
+                  splashHidden={splashHidden}
                   bootstrapReady={bootstrapReady}
                   onExitComplete={handleLoadingExitComplete}
                 />

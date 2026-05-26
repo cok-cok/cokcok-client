@@ -7,27 +7,38 @@ import {
 } from 'react-native-reanimated';
 
 import {
+  BG_FADE_DURATION_MS,
   EXIT_FADE_DURATION_MS,
   OVERLAY_FADE_DURATION_MS,
   PRE_OVERLAY_DELAY_MS,
   WHITE_OVERLAY_OPACITY,
 } from './LoadingPage.constants';
 
-// 흐려짐 오버레이 + 글자 페이드인 + 전체 종료 페이드아웃.
-// start: 배경 이미지가 보이기 시작한 시점부터 true. PRE_OVERLAY_DELAY_MS 후 fade-in 시작.
-// exiting: true면 전체 root opacity를 1→0으로 페이드아웃 (시각/로직 게이트가 모두 충족된 후).
-export function useLoadingAnimation({ start, exiting }: { start: boolean; exiting: boolean }) {
-  const enter = useSharedValue(0); // 0 hidden → 1 visible (overlay + letters)
-  const exit = useSharedValue(0); // 0 visible → 1 fully exited
+// bgReady=true 시점부터 시퀀스 시작:
+// 1) bg 이미지 fade-in (BG_FADE)
+// 2) PRE_OVERLAY_DELAY 대기
+// 3) 흰 오버레이 + 글자 fade-in (OVERLAY_FADE)
+//
+// 점프 시작은 별도 — CokcokLetters 내부에서 JUMP_START_DELAY_MS 로 처리.
+export function useLoadingAnimation({
+  bgReady,
+  exiting,
+}: {
+  bgReady: boolean;
+  exiting: boolean;
+}) {
+  const bgOpacity = useSharedValue(0);
+  const overlayProgress = useSharedValue(0);
+  const exit = useSharedValue(0);
 
   useEffect(() => {
-    if (start) {
-      enter.value = withDelay(
-        PRE_OVERLAY_DELAY_MS,
-        withTiming(1, { duration: OVERLAY_FADE_DURATION_MS }),
-      );
-    }
-  }, [start, enter]);
+    if (!bgReady) return;
+    bgOpacity.value = withTiming(1, { duration: BG_FADE_DURATION_MS });
+    overlayProgress.value = withDelay(
+      BG_FADE_DURATION_MS + PRE_OVERLAY_DELAY_MS,
+      withTiming(1, { duration: OVERLAY_FADE_DURATION_MS }),
+    );
+  }, [bgReady, bgOpacity, overlayProgress]);
 
   useEffect(() => {
     if (exiting) {
@@ -35,15 +46,12 @@ export function useLoadingAnimation({ start, exiting }: { start: boolean; exitin
     }
   }, [exiting, exit]);
 
+  const bgStyle = useAnimatedStyle(() => ({ opacity: bgOpacity.value }));
   const overlayStyle = useAnimatedStyle(() => ({
-    opacity: enter.value * WHITE_OVERLAY_OPACITY,
+    opacity: overlayProgress.value * WHITE_OVERLAY_OPACITY,
   }));
-  const lettersStyle = useAnimatedStyle(() => ({
-    opacity: enter.value,
-  }));
-  const rootExitStyle = useAnimatedStyle(() => ({
-    opacity: 1 - exit.value,
-  }));
+  const lettersStyle = useAnimatedStyle(() => ({ opacity: overlayProgress.value }));
+  const rootExitStyle = useAnimatedStyle(() => ({ opacity: 1 - exit.value }));
 
-  return { overlayStyle, lettersStyle, rootExitStyle };
+  return { bgStyle, overlayStyle, lettersStyle, rootExitStyle };
 }
