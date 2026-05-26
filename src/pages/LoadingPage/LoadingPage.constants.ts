@@ -38,7 +38,7 @@ export const LETTER_CYCLE_MS = LETTER_BOUNCE_DURATION_MS + LETTER_PER_LETTER_PAU
 
 // 글자 크기 — 디자인 원본 기준 가로폭 비율 C:O:K = 197:229:192.
 // LETTER_SCALE로 화면 폭에 맞게 일괄 조정 (1=원본, < 1 = 축소).
-export const LETTER_SCALE = 0.27;
+export const LETTER_SCALE = 0.135;
 export const LETTER_C_WIDTH = Math.round(197 * LETTER_SCALE);
 export const LETTER_O_WIDTH = Math.round(229 * LETTER_SCALE);
 export const LETTER_K_WIDTH = Math.round(192 * LETTER_SCALE);

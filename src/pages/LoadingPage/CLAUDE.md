@@ -62,16 +62,16 @@ type Props = {
 
 ## 글자 사이즈 / 정렬
 
-각 글자 가로폭은 디자인 원본 기준 비율 **C : O : K = 197 : 229 : 192**. `LETTER_SCALE` (default 0.27)로 전체 일괄 조정. 높이는 각 글자의 원본 비율에서 자동 산출.
+각 글자 가로폭은 디자인 원본 기준 비율 **C : O : K = 197 : 229 : 192**. `LETTER_SCALE` (default 0.135)로 전체 일괄 조정. 높이는 각 글자의 원본 비율에서 자동 산출.
 
 ```
-LETTER_C_WIDTH = round(197 * 0.27) = 53
-LETTER_O_WIDTH = round(229 * 0.27) = 62
-LETTER_K_WIDTH = round(192 * 0.27) = 52
+LETTER_C_WIDTH = round(197 * 0.135) = 27
+LETTER_O_WIDTH = round(229 * 0.135) = 31
+LETTER_K_WIDTH = round(192 * 0.135) = 26
 
-LETTER_C_HEIGHT ≈ 53 / 0.876 = 60.5
-LETTER_O_HEIGHT ≈ 62 / 1.022 = 60.7
-LETTER_K_HEIGHT ≈ 52 / 0.627 = 82.9
+LETTER_C_HEIGHT ≈ 27 / 0.876 = 30.8
+LETTER_O_HEIGHT ≈ 31 / 1.022 = 30.3
+LETTER_K_HEIGHT ≈ 26 / 0.627 = 41.5
 ```
 
 K가 lowercase 'k'라 ascender 때문에 더 큼. 행은 `alignItems: 'flex-end'` (아래단 정렬) — C/O는 baseline에 맞고 K만 위로 솟음.
