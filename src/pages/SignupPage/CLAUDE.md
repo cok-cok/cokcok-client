@@ -200,9 +200,20 @@
   "email": "string",
   "password": "string",
   "password중복확인": "string",
-  "nickname": "string"
+  "nickname": "string",
+  "agreements": {
+    "terms-of-service": "1.0.0",
+    "privacy-consent": "1.0.0",
+    "age-confirm": "1.0.0",
+    "marketing-consent": "1.0.0"
+  }
 }
 ```
+
+- `agreements`: 회원가입 직전 매니페스트(§8-5)에서 받은 각 약관의 version을 그대로 담아 보냄.
+- 필수 약관(`required: true`)의 키는 모두 포함되어야 함. 누락 시 서버는 400 반환.
+- 선택 약관은 동의했을 때만 키를 포함 (또는 `null`로 명시). 미동의면 키 생략.
+- 서버는 이 매핑을 회원의 동의 이력에 그대로 영구 저장하여, 추후 약관 개정 시 재동의 대상 판단·법적 증명에 활용.
 
 **Response 성공**
 
@@ -220,6 +231,111 @@
   "message": "이미 가입된 이메일입니다."
 }
 ```
+
+추가 실패 케이스:
+
+```json
+{ "message": "필수 약관에 동의해야 회원가입이 가능합니다." }
+```
+
+```json
+{ "message": "약관 버전이 최신이 아닙니다. 새로고침 후 다시 시도해주세요." }
+```
+
+### 5) 약관 매니페스트 조회
+
+| 항목     | 내용                                    |
+| -------- | --------------------------------------- |
+| API 목적 | 회원가입 시 노출할 약관 메타데이터 조회 |
+| Method   | GET                                     |
+| Endpoint | /api/legal/manifest                     |
+
+회원가입 페이지 진입 시 호출. 페이로드가 작아 페이지 첫 paint 차단 없음. 각 약관의 **현재 버전**·**필수 여부**·**본문 존재 여부** 등을 제공해 클라가 동의 체크박스 영역을 렌더하고, 사용자가 "보기"를 눌렀을 때 §8-6 본문 API를 호출하면 됨.
+
+**Request** — 없음
+
+**Response 성공**
+
+```json
+{
+  "items": [
+    {
+      "key": "terms-of-service",
+      "version": "1.0.0",
+      "title": "서비스 이용약관",
+      "required": true,
+      "hasContent": true,
+      "effectiveDate": "2026-06-01"
+    },
+    {
+      "key": "privacy-consent",
+      "version": "1.0.0",
+      "title": "개인정보 수집·이용",
+      "required": true,
+      "hasContent": true,
+      "effectiveDate": "2026-06-01"
+    },
+    {
+      "key": "age-confirm",
+      "version": "1.0.0",
+      "title": "만 14세 이상입니다",
+      "required": true,
+      "hasContent": false
+    },
+    {
+      "key": "marketing-consent",
+      "version": "1.0.0",
+      "title": "마케팅 정보 수신 동의",
+      "required": false,
+      "hasContent": true,
+      "effectiveDate": "2026-06-01"
+    }
+  ]
+}
+```
+
+필드 설명:
+
+| 필드            | 타입                | 설명                                                                    |
+| --------------- | ------------------- | ----------------------------------------------------------------------- |
+| `key`           | string              | 약관 식별자. 본문 API path에 그대로 사용                                |
+| `version`       | string (semver)     | 현재 게시 버전. 회원가입 시 `agreements` 매핑에 함께 전송               |
+| `title`         | string              | 체크박스 옆에 노출할 제목                                               |
+| `required`      | boolean             | true면 동의 안 하면 가입 불가                                           |
+| `hasContent`    | boolean             | false면 "보기" 버튼 숨기고 본문 API 호출도 하지 않음 (예: 만 14세 확인) |
+| `effectiveDate` | string (YYYY-MM-DD) | 시행일. 본문이 있는 약관에만 의미 있음                                  |
+
+### 6) 약관 본문 조회
+
+| 항목     | 내용                                 |
+| -------- | ------------------------------------ |
+| API 목적 | 특정 버전의 약관 본문(markdown) 조회 |
+| Method   | GET                                  |
+| Endpoint | /api/legal/{key}/{version}           |
+
+사용자가 "보기" 버튼을 누른 시점에 lazy 호출. URL에 version이 포함되어 사실상 불변 리소스 — 강한 캐시 권장 (`Cache-Control: public, max-age=31536000, immutable`). 클라이언트도 `legal:{key}:{version}` 키로 device storage에 저장하여 재방문 시 네트워크 안 타게 함.
+
+**Path 파라미터**
+
+- `key`: 약관 식별자 (§8-5 응답의 `key`)
+- `version`: 매니페스트에서 받은 정확한 version
+
+**Response 성공** — `Content-Type: text/markdown; charset=utf-8`
+원문 markdown 그대로. 클라가 markdown 렌더러로 표시.
+
+**Response 실패**
+
+```json
+{ "message": "해당 약관 버전을 찾을 수 없습니다." }
+```
+
+### 약관 처리 흐름 정리
+
+1. 회원가입 페이지 진입 → `GET /api/legal/manifest` 1회 호출
+2. 매니페스트의 `items`를 순회하여 체크박스 영역 렌더 (제목·필수표시·"보기" 버튼)
+3. 사용자가 "보기" 클릭 → `GET /api/legal/{key}/{version}` lazy 호출 → 클라 캐시
+4. 사용자가 회원가입 버튼 클릭 → §8-4 회원가입 API의 `agreements`에 매니페스트의 version 그대로 매핑하여 전송
+5. (재방문/재로그인 시 추후) — 매니페스트 비교로 사용자의 마지막 동의 버전과 다른 약관이 있으면 재동의 화면
 
 ## 9. 에러 처리
 
