@@ -86,9 +86,9 @@ const styles = StyleSheet.create({
   d_normal: { backgroundColor: DISABLED_BG },
   d_label: { color: DISABLED_LABEL },
 
-  s_sm: { paddingVertical: 7, paddingHorizontal: 14 },
-  s_md: { paddingVertical: 11, paddingHorizontal: 18 },
-  s_lg: { paddingVertical: 15, paddingHorizontal: 24 },
+  s_sm: { paddingVertical: 7, paddingHorizontal: 14, minHeight: 36 },
+  s_md: { paddingVertical: 11, paddingHorizontal: 18, minHeight: 44 },
+  s_lg: { paddingVertical: 15, paddingHorizontal: 24, minHeight: 52 },
 
   label_s_sm: { fontSize: 13 },
   label_s_md: { fontSize: 15 },
