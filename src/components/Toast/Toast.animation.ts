@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { Platform } from 'react-native';
 import {
   Easing,
+  interpolateColor,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -20,7 +21,7 @@ const SWIPE_TRANSLATE_TIMING = { duration: 240, easing: Easing.out(Easing.cubic)
 const ENTRY_OPACITY_TIMING = { duration: 200 };
 const ENTRY_OFFSCREEN = 160;
 const STACK_TIMING = { duration: TOAST_STACK_TRANSITION_MS, easing: Easing.out(Easing.cubic) };
-// Android elevation은 system render라 부모 opacity와 무관하게 잔존 → opacity와 함께 elevation 보간
+// Android elevation은 system render라 부모 opacity와 무관 → opacity와 함께 보간
 const ANDROID_ELEVATION = Platform.OS === 'android' ? 10 : 0;
 
 type Args = {
@@ -80,7 +81,6 @@ export function useToastAnimation({ position, stackIndex, reduceMotion }: Args) 
     const idx = stackProgress.value;
     const stackTranslateY = position === 'top' ? idx * TOAST_STACK_OFFSET : -idx * TOAST_STACK_OFFSET;
     const stackScale = 1 - idx * TOAST_STACK_SCALE_STEP;
-    // 뒤로 밀린 토스트도 background opaque 유지 — 겹쳐 보이지 않게 stackOpacity 적용 안 함
     return {
       opacity: opacity.value,
       transform: [
@@ -90,10 +90,17 @@ export function useToastAnimation({ position, stackIndex, reduceMotion }: Args) 
     };
   });
 
-  // Android elevation을 opacity와 함께 0→10→0으로 보간 (잔여 그림자 방지). iOS는 0으로 no-op
   const shadowStyle = useAnimatedStyle(() => ({
     elevation: opacity.value * ANDROID_ELEVATION,
   }));
 
-  return { animatedStyle, dragY, exit, shadowStyle, swipeDismiss };
+  const surfaceColorStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      stackProgress.value,
+      [0, 1, 2],
+      ['#FFFFFF', '#F1F2F4', '#E4E6EA'],
+    ),
+  }));
+
+  return { animatedStyle, dragY, exit, shadowStyle, surfaceColorStyle, swipeDismiss };
 }

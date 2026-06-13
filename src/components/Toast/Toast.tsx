@@ -42,8 +42,10 @@ type Props = {
   reduceMotion: boolean;
 };
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 function ToastInner({ item, stackIndex, isFront, onRemove, onMeasure, reduceMotion }: Props) {
-  const { animatedStyle, dragY, exit, shadowStyle, swipeDismiss } = useToastAnimation({
+  const { animatedStyle, dragY, exit, shadowStyle, surfaceColorStyle, swipeDismiss } = useToastAnimation({
     position: item.position,
     stackIndex,
     reduceMotion,
@@ -80,19 +82,16 @@ function ToastInner({ item, stackIndex, isFront, onRemove, onMeasure, reduceMoti
     }
     const text = [item.title, item.description, item.message].filter(Boolean).join(', ');
     if (text) AccessibilityInfo.announceForAccessibility(text);
-    // promise 패턴에서 동일 id로 update될 때 재실행 안 되도록 id에만 의존
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.id]);
 
-  // 외부 dismiss(API) — _dismissing 플래그 감지 시 exit 애니메이션 트리거
   useEffect(() => {
     if (item._dismissing) {
       triggerExit();
     }
   }, [item._dismissing, triggerExit]);
 
-  // 뒤로 밀린 토스트(isFront=false)는 시간 멈춤 — 앞으로 와야만 timer 시작.
-  // _resetKey 변경 시(dedup) timer 재시작.
+  // 뒤로 밀린 토스트는 timer 멈춤. _resetKey 변경 시(dedup) timer 재시작.
   useEffect(() => {
     if (!isFront || item.duration === Infinity || paused) return;
     const timer = setTimeout(triggerExit, item.duration);
@@ -135,9 +134,7 @@ function ToastInner({ item, stackIndex, isFront, onRemove, onMeasure, reduceMoti
     <GestureDetector gesture={pan}>
       <Animated.View
         style={[toastWrapperStyle, anchorStyle, animatedStyle]}
-        // Android에서 nested View + opacity + elevation 페이드 시 레이어별로 따로 렌더되는 이슈
-        // (border/그림자는 회색으로 남고 surface bg만 투명해짐) 회피용 — 트리 전체를 오프스크린
-        // 비트맵으로 한 번에 합성해서 opacity가 균일하게 적용되게 함
+        // Android에서 nested View + opacity + elevation 페이드 시 레이어 분리 이슈 회피 — 오프스크린 합성 강제
         needsOffscreenAlphaCompositing
         pointerEvents={isFront ? 'auto' : 'none'}
         accessibilityRole="alert"
@@ -147,11 +144,11 @@ function ToastInner({ item, stackIndex, isFront, onRemove, onMeasure, reduceMoti
           style={[toastShadowStyle, shadowStyle]}
           onLayout={(e) => onMeasure?.(item.id, e.nativeEvent.layout.height)}
         >
-          <Pressable
+          <AnimatedPressable
             disabled={!isFront}
             onPressIn={() => setPaused(true)}
             onPressOut={() => setPaused(false)}
-            style={toastSurfaceStyle}
+            style={[toastSurfaceStyle, surfaceColorStyle]}
           >
             <View style={getAccentBarStyle(item.type)} pointerEvents="none" />
             {iconNode ? <View style={iconWrapStyle}>{iconNode}</View> : null}
@@ -173,13 +170,11 @@ function ToastInner({ item, stackIndex, isFront, onRemove, onMeasure, reduceMoti
                 />
               </View>
             ) : null}
-          </Pressable>
+          </AnimatedPressable>
         </Animated.View>
       </Animated.View>
     </GestureDetector>
   );
 }
 
-// React.memo로 ToastHost의 잦은 리렌더(새 토스트 push, stack 변동) 시 prop이 동일한
-// 토스트의 재실행 차단 — 연속 push 시 성능 최적화
 export const Toast = memo(ToastInner);
