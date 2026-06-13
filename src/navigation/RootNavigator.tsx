@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import LegalDocumentPage from '../pages/LegalDocumentPage';
 import LoginPage from '../pages/LoginPage';
 import MyPage from '../pages/MyPage';
 import MyRecipeListPage from '../pages/MyRecipeListPage';
@@ -16,6 +17,11 @@ export default function RootNavigator() {
     <Stack.Navigator id={undefined} initialRouteName="MyRecipeList">
       <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
       <Stack.Screen name="Signup" component={SignupPage} options={{ title: '회원가입' }} />
+      <Stack.Screen
+        name="LegalDocument"
+        component={LegalDocumentPage}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="MyRecipeList" component={MyRecipeListPage} options={{ title: '내 레시피' }} />
       <Stack.Screen name="RecipeForm" component={RecipeFormPage} options={{ title: '레시피 작성' }} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} options={{ title: '레시피 상세' }} />
