@@ -4848,6 +4848,7 @@ __metadata:
     expo: "npm:~54.0.32"
     expo-asset: "npm:~12.0.13"
     expo-haptics: "npm:~15.0.8"
+    expo-image: "npm:~3.0.11"
     expo-splash-screen: "npm:~31.0.13"
     husky: "npm:^9.1.7"
     lucide-react-native: "npm:^1.14.0"
@@ -6554,6 +6555,21 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10c0/25f58bbbb5faa0d05701ada7f1247adead98a7e30dcbac136aa3e458773584ac758318a02d906de7ba85d63cbd45e7edde3dc35e61825f0dc1e8ed20668ed594
+  languageName: node
+  linkType: hard
+
+"expo-image@npm:~3.0.11":
+  version: 3.0.11
+  resolution: "expo-image@npm:3.0.11"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 10c0/a1cc61d3927ec5eb96875c2021706e1a418d37a77d1e657a4e0d3aa9b3325a45501b1113847783b0b249ca3679286dfb7683ed8239c48a206e9fdf79f232c754
   languageName: node
   linkType: hard
 
