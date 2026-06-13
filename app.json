@@ -8,7 +8,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FBFAF9"
+          "backgroundColor": "#FBFAF9",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 1
         }
       ],
       "expo-asset"
