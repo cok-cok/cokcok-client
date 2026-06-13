@@ -20,8 +20,7 @@ export function _registerToastAPI(api: ToastAPI | null) {
 
 const noopId = () => '';
 
-// 비-React 컨텍스트(예: api client)에서 import 해서 직접 호출용 싱글톤.
-// ToastProvider가 마운트 전이면 no-op (id 리턴은 '').
+// 비-React 컨텍스트에서 import해서 호출하는 싱글톤. Provider 마운트 전이면 no-op.
 export const toast: ToastAPI = {
   show: (input) => registered?.show(input) ?? noopId(),
   success: (m, o) => registered?.success(m, o) ?? noopId(),

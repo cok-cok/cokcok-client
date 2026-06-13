@@ -36,9 +36,7 @@ export type ToastItem = {
   icon?: IconName | ReactNode | null;
   onShow?: () => void;
   onDismiss?: () => void;
-  // 외부에서 dismiss 호출 시 exit 애니메이션 트리거용 (내부)
   _dismissing?: boolean;
-  // dedup 시 동일 토스트의 timer 재시작 트리거용 (내부) — 값이 바뀌면 Toast가 감지해 timer 리셋
   _resetKey?: number;
 };
 

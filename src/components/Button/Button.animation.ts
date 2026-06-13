@@ -12,7 +12,6 @@ import type { ButtonVariant } from './Button.types';
 const PRESS_SPRING = { mass: 0.4, damping: 14, stiffness: 220 };
 const STATE_TIMING = { duration: 200 };
 
-// variant별 active / disabled 색 매핑 — Button.styles.ts와 동기 유지 필요
 const BRAND = '#FD4C06';
 const DANGER = '#DC2626';
 const WHITE = '#FFFFFF';

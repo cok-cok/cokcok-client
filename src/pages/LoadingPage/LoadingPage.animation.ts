@@ -14,12 +14,6 @@ import {
   WHITE_OVERLAY_OPACITY,
 } from './LoadingPage.constants';
 
-// bgReady=true 시점부터 시퀀스 시작:
-// 1) bg 이미지 fade-in (BG_FADE)
-// 2) PRE_OVERLAY_DELAY 대기
-// 3) 흰 오버레이 + 글자 fade-in (OVERLAY_FADE)
-//
-// 점프 시작은 별도 — CokcokLetters 내부에서 JUMP_START_DELAY_MS 로 처리.
 export function useLoadingAnimation({
   bgReady,
   exiting,

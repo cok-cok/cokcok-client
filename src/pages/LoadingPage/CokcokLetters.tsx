@@ -34,7 +34,6 @@ const K_SRC = require('../../../assets/cokcok-letter-k.png');
 
 type LetterSpec = { src: number; width: number; ratio: number };
 
-// COKCOK 순서로 6글자 — 폭은 사용자 지정 비율(C:O:K = 197:229:192)에 맞춰 LoadingPage.constants에서 산출.
 const LETTER_SPECS: LetterSpec[] = [
   { src: C_SRC, width: LETTER_C_WIDTH, ratio: LETTER_C_RATIO },
   { src: O_SRC, width: LETTER_O_WIDTH, ratio: LETTER_O_RATIO },
@@ -44,7 +43,6 @@ const LETTER_SPECS: LetterSpec[] = [
   { src: K_SRC, width: LETTER_K_WIDTH, ratio: LETTER_K_RATIO },
 ];
 
-// damped sine — Spinner와 동일 (Spinner.animation.ts 참고)
 const CYCLES = 1.5;
 const DECAY = 1.5;
 const PHASE = 2 * Math.PI * CYCLES;
@@ -83,7 +81,6 @@ function Letter({ source, width, ratio, index, start, onCycleEnd }: LetterProps)
       -1,
     );
 
-    // bgReady=true 시점부터 글자 페이드인이 끝나고 PRE_JUMP_DELAY 후 점프 시작 (인덱스별 stagger).
     progress.value = withDelay(JUMP_START_DELAY_MS + LETTER_STAGGER_MS * index, loop);
 
     return () => cancelAnimation(progress);
@@ -116,7 +113,6 @@ type Props = {
   onCycleEnd: () => void;
 };
 
-// 마지막 글자(index=5, K)의 BOUNCE 완료마다 onCycleEnd 발화 — "모든 글자 1바퀴" 기준.
 export function CokcokLetters({ containerStyle, start, onCycleEnd }: Props) {
   return (
     <Animated.View style={[styles.lettersWrap, containerStyle]} pointerEvents="none">

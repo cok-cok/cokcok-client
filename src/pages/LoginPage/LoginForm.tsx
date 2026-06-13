@@ -43,7 +43,7 @@ export function LoginForm({ entranceStyle, onSuccess }: Props) {
       return;
     }
 
-    // TODO 실제 API 붙으면 제거 — 개발 임시 backdoor 계정 (UI 검수용)
+    // TODO 실제 API 붙으면 제거 — 개발 임시 backdoor 계정
     if (email === TEST_EMAIL && password === TEST_PASSWORD) {
       setEmail('');
       setPassword('');
@@ -62,8 +62,6 @@ export function LoginForm({ entranceStyle, onSuccess }: Props) {
       Keyboard.dismiss();
       onSuccess();
     } catch (err) {
-      // 서버 응답이 있는 케이스(4xx/5xx) — 서버가 내려준 message 그대로 노출.
-      // 그 외(network, parse, 알 수 없음) — 사용자에게 노출 가능한 일반 안내로 fallback.
       if (err instanceof ApiError) {
         toast.error(err.message);
       } else {

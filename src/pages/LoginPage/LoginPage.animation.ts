@@ -8,7 +8,6 @@ import {
   WHITE_OVERLAY_OPACITY,
 } from './LoginPage.constants';
 
-// 배경 이미지 + 로고가 둘 다 로드된 후(`ready`) 단일 sharedValue로 동시 fade-in
 export function useEntranceAnimation(ready: boolean) {
   const progress = useSharedValue(0);
 
@@ -25,8 +24,6 @@ export function useEntranceAnimation(ready: boolean) {
   return { bgStyle, overlayStyle, contentStyle };
 }
 
-// 두 플랫폼 모두 manual — softInputMode=pan으로 시스템 자동 동작 끈 상태라 paddingBottom 직접 보정.
-// KeyboardAvoidingView 안 쓰는 이유: iOS padding behavior가 input 포커스 전환 시 frame 재계산해서 덜컥거림
 export function useKeyboardPadding() {
   const kbHeight = useSharedValue(0);
 
