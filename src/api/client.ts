@@ -1,6 +1,6 @@
-// 모든 API 호출의 진입점. 실패는 NetworkError(전송 실패) 또는 ApiError(서버 응답 4xx/5xx)로 정규화
-
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.cokcok.com';
+
+export const DEFAULT_TIMEOUT_MS = 20_000;
 
 export class ApiError extends Error {
   readonly status: number;
@@ -29,10 +29,28 @@ type RequestOptions = {
   body?: unknown;
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  timeoutMs?: number;
 };
 
+function combineSignals(signals: (AbortSignal | undefined)[]): AbortSignal {
+  const controller = new AbortController();
+  for (const s of signals) {
+    if (!s) continue;
+    if (s.aborted) {
+      controller.abort();
+      break;
+    }
+    s.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  return controller.signal;
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, headers = {}, signal } = options;
+  const { method = 'GET', body, headers = {}, signal: externalSignal, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
+  const signal = combineSignals([externalSignal, timeoutController.signal]);
 
   let response: Response;
   try {
@@ -43,15 +61,17 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       signal,
     });
   } catch (err) {
+    clearTimeout(timeoutId);
     throw new NetworkError(err);
   }
+  clearTimeout(timeoutId);
 
   let parsed: unknown = null;
   if (response.status !== 204) {
     try {
       parsed = await response.json();
     } catch {
-      // 빈 body 또는 비-JSON 응답
+      // ignore non-JSON body
     }
   }
 
