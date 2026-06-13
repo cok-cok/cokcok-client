@@ -16,7 +16,7 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator id={undefined} initialRouteName="MyRecipeList">
       <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: false }} />
-      <Stack.Screen name="Signup" component={SignupPage} options={{ title: '회원가입' }} />
+      <Stack.Screen name="Signup" component={SignupPage} options={{ headerShown: false }} />
       <Stack.Screen
         name="LegalDocument"
         component={LegalDocumentPage}
