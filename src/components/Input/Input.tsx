@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import {
   type NativeSyntheticEvent,
   Platform,
@@ -9,7 +9,7 @@ import {
   type TextInputProps,
   View,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { Icon, IconSizeContext } from '../Icon';
 import { Spinner } from '../Spinner';
@@ -62,10 +62,9 @@ const TYPE_DEFAULTS: Record<InputType, Partial<TextInputProps>> = {
     textContentType: 'password',
     autoCorrect: false,
     spellCheck: false,
-    // 영문 키보드 고정으로 secureTextEntry 토글 시 IME 리셋(한/영 전환) 차단.
-    // iOS: ascii-capable로 한글 IME 비활성. Android: visible-password로 영문 키보드 강제
-    // (secureTextEntry=true와 함께 쓰면 가시화는 secureTextEntry가 우선해 정상적으로 가려짐)
-    keyboardType: Platform.OS === 'ios' ? 'ascii-capable' : 'visible-password',
+    // iOS: ascii-capable로 한글 IME 비활성 (영문 키보드 고정). Android: 명시 안 함 — visible-password가
+    // secureTextEntry를 무력화하는 RN 이슈 회피.
+    keyboardType: Platform.OS === 'ios' ? 'ascii-capable' : undefined,
   },
   number: {
     keyboardType: 'numeric',
@@ -94,6 +93,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
     trailingAction,
     showCounter,
     shakeOnError = true,
+    completed = false,
     style,
     inputStyle,
     onFocus,
@@ -206,76 +206,100 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   const counter = showCounter && maxLength ? `${currentValue?.length ?? 0}/${maxLength}` : null;
   const showBottomRow = Boolean(error || helperText || counter);
 
-  const inputBox = (
-    <View style={boxWrapperStyle}>
-      {label ? (
-        <Animated.Text style={[getLabelStyle({ size }), state.labelStyle]}>
-          {label}
-          {required ? <Text style={{ color: REQUIRED_MARK_COLOR }}> *</Text> : null}
-        </Animated.Text>
-      ) : null}
+  const labelNode = label ? (
+    <Animated.Text style={[getLabelStyle({ size }), state.labelStyle]}>
+      {label}
+      {required ? <Text style={{ color: REQUIRED_MARK_COLOR }}> *</Text> : null}
+    </Animated.Text>
+  ) : null;
 
-      <AnimatedPressable
-        onPress={focusInput}
-        disabled={disabled}
-        style={[getBoxStyle({ variant, size, multiline: isMultiline }), state.boxStyle]}
-      >
-        <IconSizeContext.Provider value={iconSize}>
-          {iconLeft ? <View>{iconLeft}</View> : null}
-          <TextInput
-            ref={setRef}
-            placeholderTextColor={PLACEHOLDER_COLOR}
-            cursorColor={SELECTION_COLOR}
-            selectionColor={SELECTION_COLOR}
-            {...typeDefaults}
-            {...rest}
-            value={isControlled ? value : internalValue}
-            defaultValue={isControlled ? undefined : defaultValue}
-            maxLength={maxLength}
-            editable={!disabled}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onChangeText={handleChangeText}
-            secureTextEntry={secureTextEntry}
-            accessibilityLabel={accessibilityLabel ?? label}
-            accessibilityHint={accessibilityHint ?? error ?? helperText}
-            accessibilityState={{ disabled, ...accessibilityState }}
-            style={getInputStyle({ size, multiline: isMultiline, override: inputStyle })}
-          />
-          {resolvedIconRight ? <View>{resolvedIconRight}</View> : null}
-        </IconSizeContext.Provider>
-      </AnimatedPressable>
-
-      {showBottomRow ? (
-        <View style={bottomRowStyle}>
-          {error ? (
-            <View style={errorIconWrapperStyle}>
-              <Icon name="alertCircle" size={14} color={ERROR_COLOR} accessibilityLabel={ERROR_ICON_LABEL} />
-            </View>
-          ) : null}
-          {error || helperText ? (
-            <Animated.Text style={[getHelperStyle({ size }), helperContentStyle, state.helperStyle]}>
-              {error ?? helperText}
-            </Animated.Text>
-          ) : null}
-          {counter ? (
-            <Animated.Text style={[getHelperStyle({ size }), counterStyle, state.helperStyle]}>{counter}</Animated.Text>
-          ) : null}
-        </View>
-      ) : null}
-    </View>
+  const boxNode = (
+    <AnimatedPressable
+      onPress={focusInput}
+      disabled={disabled}
+      style={[getBoxStyle({ variant, size, multiline: isMultiline }), state.boxStyle]}
+    >
+      <IconSizeContext.Provider value={iconSize}>
+        {iconLeft ? <View>{iconLeft}</View> : null}
+        <TextInput
+          ref={setRef}
+          placeholderTextColor={PLACEHOLDER_COLOR}
+          cursorColor={SELECTION_COLOR}
+          selectionColor={SELECTION_COLOR}
+          {...typeDefaults}
+          {...rest}
+          value={isControlled ? value : internalValue}
+          defaultValue={isControlled ? undefined : defaultValue}
+          maxLength={maxLength}
+          editable={!disabled}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onChangeText={handleChangeText}
+          secureTextEntry={secureTextEntry}
+          accessibilityLabel={accessibilityLabel ?? label}
+          accessibilityHint={accessibilityHint ?? error ?? helperText}
+          accessibilityState={{ disabled, ...accessibilityState }}
+          style={getInputStyle({ size, multiline: isMultiline, override: inputStyle })}
+        />
+        {resolvedIconRight ? <View>{resolvedIconRight}</View> : null}
+      </IconSizeContext.Provider>
+    </AnimatedPressable>
   );
 
+  const bottomRowNode = showBottomRow ? (
+    <Animated.View
+      style={bottomRowStyle}
+      entering={FadeIn.duration(180)}
+      exiting={FadeOut.duration(120)}
+    >
+      {error ? (
+        <View style={errorIconWrapperStyle}>
+          <Icon name="alertCircle" size={14} color={ERROR_COLOR} accessibilityLabel={ERROR_ICON_LABEL} />
+        </View>
+      ) : null}
+      {error || helperText ? (
+        <Animated.Text style={[getHelperStyle({ size }), helperContentStyle, state.helperStyle]}>
+          {error ?? helperText}
+        </Animated.Text>
+      ) : null}
+      {counter ? (
+        <Animated.Text style={[getHelperStyle({ size }), counterStyle, state.helperStyle]}>{counter}</Animated.Text>
+      ) : null}
+    </Animated.View>
+  ) : null;
+
+  const LAYOUT = LinearTransition.duration(220);
+
+  const isDimmed = completed && !focused && !disabled;
+
+  // Android Animated.View + opacity 레이어 분리 이슈 회피용 — RN View로 한 번 감싸 오프스크린 합성 강제
+  const wrapWithDim = (node: ReactElement) =>
+    isDimmed ? (
+      <View style={{ opacity: 0.55 }} needsOffscreenAlphaCompositing>
+        {node}
+      </View>
+    ) : (
+      node
+    );
+
   if (trailingAction) {
-    return (
-      <View style={[outerContainerStyle, style]}>
+    return wrapWithDim(
+      <Animated.View style={[outerContainerStyle, style]} layout={LAYOUT}>
+        {labelNode}
         <View style={rowWithTrailingStyle}>
-          {inputBox}
+          <View style={boxWrapperStyle}>{boxNode}</View>
           <View style={trailingActionWrapperStyle}>{trailingAction}</View>
         </View>
-      </View>
+        {bottomRowNode}
+      </Animated.View>,
     );
   }
 
-  return <View style={[containerStyle, style]}>{inputBox}</View>;
+  return wrapWithDim(
+    <Animated.View style={[containerStyle, style]} layout={LAYOUT}>
+      {labelNode}
+      {boxNode}
+      {bottomRowNode}
+    </Animated.View>,
+  );
 });
