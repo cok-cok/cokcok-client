@@ -23,6 +23,4 @@ function SpinnerInner({ color = 'brand', size = 'md', style, accessibilityLabel 
   );
 }
 
-// memo — Button/Input loading 슬롯에서 부모 리렌더 시 props 동일하면 worklet 셋업/3개의
-// useAnimatedStyle 재실행을 차단. Spinner는 항상 애니메이션 중이라 비용이 작지 않음
 export const Spinner = memo(SpinnerInner);

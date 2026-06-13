@@ -44,7 +44,6 @@ export function ToastHost({ items, onRemove, onClearPosition }: Props) {
     };
   }, []);
 
-  // softInputMode=pan 으로 시스템 자동 동작 끈 상태라 manual로 bottom 토스트를 키보드 위로 보정
   useEffect(() => {
     const isIos = Platform.OS === 'ios';
     const showEvent = isIos ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -65,7 +64,6 @@ export function ToastHost({ items, onRemove, onClearPosition }: Props) {
     bottom: insets.bottom + TOAST_GAP + keyboardHeight.value,
   }));
 
-  // unmount된 토스트의 높이 정리
   useEffect(() => {
     setHeights((prev) => {
       const ids = new Set(items.map((i) => i.id));
@@ -98,7 +96,6 @@ export function ToastHost({ items, onRemove, onClearPosition }: Props) {
   const bottomOffset =
     bottomFrontHeight + Math.max(0, bottomItems.length - 1) * TOAST_STACK_OFFSET + CLEAR_ALL_GAP;
 
-  // 모두제거 버튼은 _dismissing 제외한 active 카운트 기준 — 누른 순간 토스트와 동시에 fade out
   const topActiveCount = topItems.filter((i) => !i._dismissing).length;
   const bottomActiveCount = bottomItems.filter((i) => !i._dismissing).length;
   const topReady = !topFront || heights[topFront.id] !== undefined;

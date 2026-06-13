@@ -65,8 +65,6 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: TOAST_HORIZONTAL_MARGIN,
   },
-  // shadow는 wrapper에 (overflow:hidden이 iOS shadow를 자름).
-  // elevation은 Toast.animation의 shadowStyle에서 opacity와 함께 보간(android 잔여 그림자 방지)
   toastShadow: {
     borderRadius: 16,
     backgroundColor: BG_LIGHT,

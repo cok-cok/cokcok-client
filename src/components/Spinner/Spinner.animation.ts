@@ -15,12 +15,9 @@ const STAGGER = 220;
 const PAUSE_AFTER_ALL = 380;
 const PER_CIRCLE_PAUSE = STAGGER * 2 + PAUSE_AFTER_ALL;
 
-// damped sine — y = A * scale * sin(2π * cycles * p) * exp(-decay * p)
-// 1.5 cycles 동안 진동, exp 감쇠로 0에 자연 수렴 (3개 peak: 위, 아래, 작게 위)
 const CYCLES = 1.5;
 const DECAY = 1.5;
 const PHASE = 2 * Math.PI * CYCLES;
-// 첫 peak에서 nominal jumpHeight에 도달하도록 scale 보정
 const AMPLITUDE_SCALE = 1 / Math.exp(-DECAY / (4 * CYCLES));
 
 export function useSpinnerAnimation(jumpHeight: number) {

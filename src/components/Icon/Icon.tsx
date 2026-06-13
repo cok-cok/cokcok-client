@@ -32,6 +32,4 @@ function IconInner({
   );
 }
 
-// memo — 다수 위치에서 stable한 name/color/size로 호출됨. 부모 리렌더 차단으로
-// IconSizeContext consumption + lucide SVG 재계산 회피
 export const Icon = memo(IconInner);

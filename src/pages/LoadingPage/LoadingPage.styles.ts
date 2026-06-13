@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import { LETTER_GAP, PAGE_BG_COLOR } from './LoadingPage.constants';
 
 export const styles = StyleSheet.create({
-  // RootNavigator 위에 oerlay로 깔리는 형태 — absoluteFill
   root: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: PAGE_BG_COLOR,
@@ -25,7 +24,7 @@ export const styles = StyleSheet.create({
   },
   lettersRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end', // 아래단 기준 정렬 (K가 길쭉해서 위로 솟음)
+    alignItems: 'flex-end',
   },
   letter: {
     marginHorizontal: LETTER_GAP / 2,
