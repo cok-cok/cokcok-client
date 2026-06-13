@@ -21,6 +21,7 @@ export type InputProps = Omit<TextInputProps, 'style'> & {
   trailingAction?: ReactNode;
   showCounter?: boolean;
   shakeOnError?: boolean;
+  completed?: boolean;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
 };
