@@ -1,0 +1,1 @@
+export { AnimatedCheck } from './AnimatedCheck';
