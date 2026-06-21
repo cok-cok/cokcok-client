@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -7,15 +7,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { legalApi } from '../../api';
 import { Button } from '../../components/Button';
-import { Icon } from '../../components/Icon';
+import { PageHeader } from '../../components/PageHeader';
 import { Spinner } from '../../components/Spinner';
 import { useToast } from '../../components/Toast';
 import type { RootStackParamList } from '../../navigation/types';
 import { markdownStyles, styles } from './LegalDocumentPage.styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LegalDocument'>;
-
-const BACK_ICON_SIZE = 28;
 
 export default function LegalDocumentPage({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
@@ -57,22 +55,12 @@ export default function LegalDocumentPage({ navigation, route }: Props) {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={handleCancel}
-            style={styles.headerBack}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="취소"
-          >
-            <Icon name="chevronLeft" size={BACK_ICON_SIZE} />
-          </Pressable>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {title}
-          </Text>
-        </View>
-      </View>
+      <PageHeader
+        left={<PageHeader.BackButton onPress={handleCancel} label="취소" />}
+        title={title}
+        borderBottom
+      />
+      <View style={{ height: insets.top + PageHeader.HEIGHT }} />
 
       {loading ? (
         <View style={styles.loadingFull}>
