@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Icon } from '../../components/Icon';
+import { PageHeader } from '../../components/PageHeader';
 import { PhoneFrameBackground } from '../../components/PhoneFrameBackground';
 import { Spinner } from '../../components/Spinner';
 import type { RootStackParamList } from '../../navigation/types';
@@ -18,7 +18,6 @@ import { styles } from './LoginPage.styles';
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const BG_SOURCE = require('../../../assets/login-bg.png');
-const BACK_ICON_SIZE = 28;
 
 export default function LoginPage({ navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -56,19 +55,10 @@ export default function LoginPage({ navigation }: Props) {
           </ScrollView>
         </Animated.View>
 
-        <Animated.View
-          style={[styles.floatingBack, { top: insets.top, left: 4 }, contentStyle]}
-        >
-          <Pressable
-            onPress={handleBackPress}
-            style={styles.floatingBackPressable}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="뒤로가기"
-          >
-            <Icon name="chevronLeft" size={BACK_ICON_SIZE} />
-          </Pressable>
-        </Animated.View>
+        <PageHeader
+          left={<PageHeader.BackButton onPress={handleBackPress} />}
+          style={contentStyle}
+        />
 
         {!ready ? (
           <View style={styles.loadingOverlay} pointerEvents="none">

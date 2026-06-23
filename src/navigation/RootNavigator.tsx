@@ -22,7 +22,11 @@ export default function RootNavigator() {
         component={LegalDocumentPage}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="MyRecipeList" component={MyRecipeListPage} options={{ title: '내 레시피' }} />
+      <Stack.Screen
+        name="MyRecipeList"
+        component={MyRecipeListPage}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="RecipeForm" component={RecipeFormPage} options={{ title: '레시피 작성' }} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} options={{ title: '레시피 상세' }} />
       <Stack.Screen name="MyPage" component={MyPage} options={{ title: '마이' }} />

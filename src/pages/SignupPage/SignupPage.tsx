@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import type { LegalManifestItem } from '../../api';
+import { PageHeader } from '../../components/PageHeader';
 import { Stepper } from '../../components/Stepper';
 import { useToast } from '../../components/Toast';
 import type { RootStackParamList } from '../../navigation/types';
 import { type AgreedMap, SignupAgreementsStep } from './SignupAgreementsStep';
 import { SignupForm } from './SignupForm';
-import { SignupHeader } from './SignupHeader';
 import { useEntranceAnimation } from './SignupPage.animation';
+import { PAGE_TITLE } from './SignupPage.constants';
 import { styles } from './SignupPage.styles';
 import { SignupSuccessStep } from './SignupSuccessStep';
 
@@ -23,6 +25,7 @@ const FORM_VALID_TOTAL = 6;
 const SUCCESS_TRANSITION_DELAY_MS = 700;
 
 export default function SignupPage({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const toast = useToast();
 
   const { contentStyle } = useEntranceAnimation();
@@ -115,11 +118,14 @@ export default function SignupPage({ navigation }: Props) {
       <Animated.View style={styles.flex}>
         {showHeader ? (
           <>
-            <SignupHeader
-              entranceStyle={contentStyle}
-              onBackPress={handleBackPress}
-              disabled={submitting}
+            <PageHeader
+              left={
+                <PageHeader.BackButton onPress={handleBackPress} disabled={submitting} />
+              }
+              title={PAGE_TITLE}
+              style={contentStyle}
             />
+            <View style={{ height: insets.top + PageHeader.HEIGHT }} />
             <Stepper
               completedCount={completedCount}
               line1Progress={line1Progress}

@@ -63,16 +63,6 @@ export const styles = StyleSheet.create({
     color: LINK_SEPARATOR_COLOR,
     marginHorizontal: 2,
   },
-  floatingBack: {
-    position: 'absolute',
-    height: 56,
-    justifyContent: 'center',
-  },
-  floatingBackPressable: {
-    paddingHorizontal: 8,
-    height: '100%',
-    justifyContent: 'center',
-  },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
