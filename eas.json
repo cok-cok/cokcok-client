@@ -4,6 +4,21 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "dev-client": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": false,
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk",
+        "resourceClass": "medium"
+      },
+      "env": {
+        "EXPO_PUBLIC_ENV": "dev"
+      }
+    },
     "dev": {
       "autoIncrement": true,
       "ios": {
