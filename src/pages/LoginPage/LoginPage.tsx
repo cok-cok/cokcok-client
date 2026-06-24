@@ -30,7 +30,7 @@ export default function LoginPage({ navigation }: Props) {
 
   const handleBgLoaded = useCallback(() => setBgLoaded(true), []);
   const handleLogoLoaded = useCallback(() => setLogoLoaded(true), []);
-  const handleLoginSuccess = useCallback(() => navigation.navigate('MyRecipeList'), [navigation]);
+  const handleLoginSuccess = useCallback(() => navigation.navigate('Tabs'), [navigation]);
   const handleSignupPress = useCallback(() => navigation.navigate('Signup'), [navigation]);
   const handleBackPress = useCallback(() => navigation.goBack(), [navigation]);
   const handleDismiss = useCallback(() => Keyboard.dismiss(), []);
