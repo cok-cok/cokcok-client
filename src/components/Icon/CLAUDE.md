@@ -14,37 +14,37 @@ import type { IconName, IconProps } from '@/components/Icon';
 
 ```ts
 type IconProps = {
-  name: IconName;                       // 레지스트리 키 (TypeScript 자동완성됨)
-  size?: number;                        // px. 미지정 시 IconSizeContext → 20 fallback
-  color?: string;                       // lucide stroke color
-  strokeWidth?: number;                 // lucide default 2
-  accessibilityLabel?: string;          // 의미 있는 아이콘이면 줘야 함
-  accessibilityRole?: AccessibilityRole;// 명시 override (자동 분기 안 따를 때)
+  name: IconName; // 레지스트리 키 (TypeScript 자동완성됨)
+  size?: number; // px. 미지정 시 IconSizeContext → 20 fallback
+  color?: string; // lucide stroke color
+  strokeWidth?: number; // lucide default 2
+  accessibilityLabel?: string; // 의미 있는 아이콘이면 줘야 함
+  accessibilityRole?: AccessibilityRole; // 명시 override (자동 분기 안 따를 때)
   testID?: string;
 };
 ```
 
 ## 등록된 아이콘 (17개)
 
-| 키 (camelCase) | lucide 컴포넌트 (PascalCase) |
-|---|---|
-| `alertCircle` | `AlertCircle` |
-| `alertTriangle` | `AlertTriangle` |
-| `check` | `Check` |
-| `chevronLeft` | `ChevronLeft` |
-| `chevronRight` | `ChevronRight` |
-| `clock` | `Clock` |
-| `eye` | `Eye` |
-| `eyeOff` | `EyeOff` |
-| `image` | `Image` |
-| `info` | `Info` |
-| `plus` | `Plus` |
-| `search` | `Search` |
-| `settings` | `Settings` |
-| `trash` | `Trash` |
-| `user` | `User` |
-| `x` | `X` |
-| `xCircle` | `XCircle` |
+| 키 (camelCase)  | lucide 컴포넌트 (PascalCase) |
+| --------------- | ---------------------------- |
+| `alertCircle`   | `AlertCircle`                |
+| `alertTriangle` | `AlertTriangle`              |
+| `check`         | `Check`                      |
+| `chevronLeft`   | `ChevronLeft`                |
+| `chevronRight`  | `ChevronRight`               |
+| `clock`         | `Clock`                      |
+| `eye`           | `Eye`                        |
+| `eyeOff`        | `EyeOff`                     |
+| `image`         | `Image`                      |
+| `info`          | `Info`                       |
+| `plus`          | `Plus`                       |
+| `search`        | `Search`                     |
+| `settings`      | `Settings`                   |
+| `trash`         | `Trash`                      |
+| `user`          | `User`                       |
+| `x`             | `X`                          |
+| `xCircle`       | `XCircle`                    |
 
 ### 새 아이콘 추가하는 법
 
@@ -54,7 +54,7 @@ type IconProps = {
 
 ```ts
 // 예: 'heart' 추가
-import { Heart, /* ... */ } from 'lucide-react-native';
+import { Heart /* ... */ } from 'lucide-react-native';
 export const ICONS = {
   heart: Heart,
   // ...
@@ -70,6 +70,7 @@ prop.size > IconSizeContext.value > 20 (fallback)
 `IconSizeContext`는 `createContext<number | undefined>(undefined)`. 별도 파일(`Icon.context.ts`)에 분리 — Button → Icon barrel import 시 순환 의존 회피용.
 
 `Button` / `Input`은 자체적으로 `IconSizeContext.Provider`로 size 주입:
+
 - Button: 16 (sm) / 18 (md) / 20 (lg)
 - Input: 16 / 18 / 20 (size별 동일 매핑)
 
@@ -79,11 +80,11 @@ prop.size > IconSizeContext.value > 20 (fallback)
 
 `accessibilityLabel` 유무로 "장식 vs 의미" 자동 판단:
 
-| 시나리오 | 적용 |
-|---|---|
-| `accessibilityLabel` 없음 (장식용) | `role='none'`, `accessibilityElementsHidden`, `importantForAccessibility='no-hide-descendants'` → 스크린리더 완전 무시 |
-| `accessibilityLabel` 있음 (의미 있음) | `role='image'` 자동 (override 가능), 라벨 읽힘 |
-| `accessibilityRole` 명시 | role 강제 적용 (e.g., `'button'` 으로) |
+| 시나리오                              | 적용                                                                                                                   |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `accessibilityLabel` 없음 (장식용)    | `role='none'`, `accessibilityElementsHidden`, `importantForAccessibility='no-hide-descendants'` → 스크린리더 완전 무시 |
+| `accessibilityLabel` 있음 (의미 있음) | `role='image'` 자동 (override 가능), 라벨 읽힘                                                                         |
+| `accessibilityRole` 명시              | role 강제 적용 (e.g., `'button'` 으로)                                                                                 |
 
 ## 렌더 구조
 
