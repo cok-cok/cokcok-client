@@ -10,7 +10,7 @@ export default function RecipeDetailPage({ navigation }: Props) {
   return (
     <View>
       <Text>레시피 상세 페이지 입니다.</Text>
-      <Button title="내 레시피 리스트" onPress={() => navigation.navigate('MyRecipeList')} />
+      <Button title="내 레시피 리스트" onPress={() => navigation.navigate('Tabs')} />
     </View>
   );
 }

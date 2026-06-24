@@ -11,7 +11,7 @@ export default function SettingsPage({ navigation }: Props) {
     <View>
       <Text>설정 페이지 입니다.</Text>
       <Button title="로그인" onPress={() => navigation.navigate('Login')} />
-      <Button title="마이" onPress={() => navigation.navigate('MyPage')} />
+      <Button title="마이" onPress={() => navigation.navigate('Tabs', { screen: 'MyPage' })} />
     </View>
   );
 }

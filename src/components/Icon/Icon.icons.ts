@@ -1,6 +1,7 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowUp,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -24,6 +25,7 @@ import {
 export const ICONS = {
   alertCircle: AlertCircle,
   alertTriangle: AlertTriangle,
+  arrowUp: ArrowUp,
   check: Check,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
