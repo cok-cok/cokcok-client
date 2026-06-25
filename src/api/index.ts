@@ -14,3 +14,5 @@ export * as authApi from './auth';
 export { ApiError, NetworkError } from './client';
 export type { LegalKey, LegalManifestItem, LegalManifestResponse } from './legal';
 export * as legalApi from './legal';
+export type { CookTime, GetMyRecipesParams, GetMyRecipesResponse, Recipe } from './recipes';
+export * as recipesApi from './recipes';
