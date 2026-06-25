@@ -19,6 +19,13 @@ export const BOTTOM_BAR_TABS: BottomTabBarItem[] = [
     iconActive: 'book',
   },
   {
+    key: 'RecommendedRecipes',
+    label: '추천 레시피',
+    iconInactive: 'restaurant-outline',
+    iconActive: 'restaurant',
+    disabled: true,
+  },
+  {
     key: 'MyPage',
     label: '마이페이지',
     iconInactive: 'person-outline',

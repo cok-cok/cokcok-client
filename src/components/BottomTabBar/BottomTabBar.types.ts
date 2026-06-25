@@ -1,5 +1,6 @@
-import type { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
+
+import type { Ionicons } from '@expo/vector-icons';
 
 export type BottomTabBarIconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -8,6 +9,7 @@ export type BottomTabBarItem = {
   label: string;
   iconActive: BottomTabBarIconName;
   iconInactive: BottomTabBarIconName;
+  disabled?: boolean;
 };
 
 export type BottomTabBarProps = {
