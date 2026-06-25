@@ -12,7 +12,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 
-import { BOTTOM_TAB_BAR_ANDROID_BG, BOTTOM_TAB_BAR_COLOR } from './BottomTabBar.constants';
+import {
+  BOTTOM_TAB_BAR_ANDROID_BG,
+  BOTTOM_TAB_BAR_COLOR,
+  BOTTOM_TAB_BAR_DISABLED_COLOR,
+} from './BottomTabBar.constants';
 import { styles } from './BottomTabBar.styles';
 import type { BottomTabBarProps } from './BottomTabBar.types';
 
@@ -67,6 +71,7 @@ function BottomTabBarInner({ items, activeKey, onTabPress, testID }: BottomTabBa
       ) : null}
       {items.map((item, index) => {
         const isActive = item.key === activeKey;
+        const itemColor = item.disabled ? BOTTOM_TAB_BAR_DISABLED_COLOR : BOTTOM_TAB_BAR_COLOR;
         return (
           <Pressable
             key={item.key}
@@ -75,14 +80,14 @@ function BottomTabBarInner({ items, activeKey, onTabPress, testID }: BottomTabBa
             onPress={() => onTabPress(item.key)}
             accessibilityRole="button"
             accessibilityLabel={item.label}
-            accessibilityState={{ selected: isActive }}
+            accessibilityState={{ selected: isActive, disabled: item.disabled }}
           >
             <Ionicons
               name={isActive ? item.iconActive : item.iconInactive}
               size={TAB_ICON_SIZE}
-              color={BOTTOM_TAB_BAR_COLOR}
+              color={itemColor}
             />
-            <Text style={styles.label}>{item.label}</Text>
+            <Text style={[styles.label, { color: itemColor }]}>{item.label}</Text>
           </Pressable>
         );
       })}

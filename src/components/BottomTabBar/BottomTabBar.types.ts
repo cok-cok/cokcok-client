@@ -8,6 +8,7 @@ export type BottomTabBarItem = {
   label: string;
   iconActive: BottomTabBarIconName;
   iconInactive: BottomTabBarIconName;
+  disabled?: boolean;
 };
 
 export type BottomTabBarProps = {
