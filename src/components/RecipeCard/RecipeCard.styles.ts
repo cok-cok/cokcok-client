@@ -10,7 +10,18 @@ const CARD_BG_COLOR = '#FFFFFF';
 export const RECIPE_CARD_VERTICAL_MIN_ASPECT = 3 / 4;
 export const RECIPE_CARD_VERTICAL_MAX_ASPECT = 2 / 1;
 
-const RECIPE_CARD_GRADIENT_SIZE = 16;
+const RECIPE_CARD_VERTICAL_OVERLAP = 8;
+
+export const RECIPE_CARD_VERTICAL_OVERLAP_FADE_COLORS: readonly [string, string, string] = [
+  'rgba(255,255,255,0)',
+  'rgba(255,255,255,0.55)',
+  CARD_BG_COLOR,
+];
+export const RECIPE_CARD_VERTICAL_OVERLAP_FADE_LOCATIONS: readonly [number, number, number] = [
+  0, 0.6, 1,
+];
+
+const HORIZONTAL_GRADIENT_SIZE = 16;
 export const RECIPE_CARD_GRADIENT_COLORS: readonly [string, string, string, string, string] = [
   'rgba(255,255,255,0)',
   'rgba(255,255,255,0.016)',
@@ -73,6 +84,19 @@ export const styles = StyleSheet.create({
   verticalContent: {
     padding: RECIPE_CARD_CONTENT_PADDING,
     gap: RECIPE_CARD_CONTENT_GAP,
+    backgroundColor: CARD_BG_COLOR,
+    position: 'relative',
+  },
+  verticalContentOverlap: {
+    marginTop: -RECIPE_CARD_VERTICAL_OVERLAP,
+    paddingTop: RECIPE_CARD_CONTENT_PADDING,
+  },
+  verticalContentFade: {
+    position: 'absolute',
+    top: -RECIPE_CARD_VERTICAL_OVERLAP,
+    left: 0,
+    right: 0,
+    height: RECIPE_CARD_VERTICAL_OVERLAP,
   },
 
   middle: {
@@ -90,14 +114,7 @@ export const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     right: 0,
-    width: RECIPE_CARD_GRADIENT_SIZE,
-  },
-  verticalGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: RECIPE_CARD_GRADIENT_SIZE,
+    width: HORIZONTAL_GRADIENT_SIZE,
   },
 
   title: {
