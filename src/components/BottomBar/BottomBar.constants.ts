@@ -9,7 +9,7 @@ export const BOTTOM_BAR_SCROLL_TOP_HIDE_DISTANCE = BOTTOM_BAR_FAB_SIZE + 32;
 
 export const FAB_ICON_COLOR = '#111827';
 export const FAB_TINT_OVERLAY =
-  Platform.OS === 'android' ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.85)';
+  Platform.OS === 'android' ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.93)';
 
 export const BOTTOM_BAR_TABS: BottomTabBarItem[] = [
   {
