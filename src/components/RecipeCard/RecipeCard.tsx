@@ -1,9 +1,15 @@
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { CardBody } from './CardBody';
 import { HorizontalThumbnail } from './HorizontalThumbnail';
-import { styles } from './RecipeCard.styles';
+import {
+  RECIPE_CARD_VERTICAL_OVERLAP_FADE_COLORS,
+  RECIPE_CARD_VERTICAL_OVERLAP_FADE_LOCATIONS,
+  styles,
+} from './RecipeCard.styles';
 import type { RecipeCardProps } from './RecipeCard.types';
 import { VerticalThumbnail } from './VerticalThumbnail';
 
@@ -33,7 +39,19 @@ function RecipeCardInner({
     ) : (
       <View>
         {hasImage ? <VerticalThumbnail uri={thumbnailUrl as string} /> : null}
-        <View style={styles.verticalContent}>{content}</View>
+        <View style={[styles.verticalContent, hasImage ? styles.verticalContentOverlap : null]}>
+          {hasImage ? (
+            <LinearGradient
+              colors={RECIPE_CARD_VERTICAL_OVERLAP_FADE_COLORS}
+              locations={RECIPE_CARD_VERTICAL_OVERLAP_FADE_LOCATIONS}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.verticalContentFade}
+              pointerEvents="none"
+            />
+          ) : null}
+          {content}
+        </View>
       </View>
     );
 

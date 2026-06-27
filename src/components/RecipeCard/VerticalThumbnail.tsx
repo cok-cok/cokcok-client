@@ -2,11 +2,8 @@ import { memo, useState } from 'react';
 import { View } from 'react-native';
 
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 
 import {
-  RECIPE_CARD_GRADIENT_COLORS,
-  RECIPE_CARD_GRADIENT_LOCATIONS,
   RECIPE_CARD_VERTICAL_MAX_ASPECT,
   RECIPE_CARD_VERTICAL_MIN_ASPECT,
   styles,
@@ -34,14 +31,6 @@ function VerticalThumbnailInner({ uri }: Props) {
           const { width, height } = e.source;
           if (width > 0 && height > 0) setAspectRatio(width / height);
         }}
-      />
-      <LinearGradient
-        colors={RECIPE_CARD_GRADIENT_COLORS}
-        locations={RECIPE_CARD_GRADIENT_LOCATIONS}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.verticalGradient}
-        pointerEvents="none"
       />
     </View>
   );
