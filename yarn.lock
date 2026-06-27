@@ -2417,6 +2417,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@shopify/flash-list@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@shopify/flash-list@npm:2.0.2"
+  dependencies:
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    "@babel/runtime": "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/c4e88348ce66e8f51c6213a42574a097d54cebf2125dc3fd8c077f3f7b83e25209c67bcb9a9102a3178c146cf5c23a978febd9a5ed5328ba1d7c663b5a8149d2
+  languageName: node
+  linkType: hard
+
 "@simple-libs/child-process-utils@npm:^1.0.0":
   version: 1.0.2
   resolution: "@simple-libs/child-process-utils@npm:1.0.2"
@@ -3875,6 +3888,7 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^7.18.2"
     "@react-navigation/native": "npm:^7.3.3"
     "@react-navigation/native-stack": "npm:^7.17.5"
+    "@shopify/flash-list": "npm:2.0.2"
     "@trivago/prettier-plugin-sort-imports": "npm:^6.0.2"
     "@types/react": "npm:~19.1.10"
     "@typescript-eslint/eslint-plugin": "npm:^8.59.2"
@@ -10371,7 +10385,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.4.0":
+"tslib@npm:2.8.1, tslib@npm:^2.4.0":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
