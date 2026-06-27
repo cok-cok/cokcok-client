@@ -20,8 +20,8 @@ import {
 import { styles } from './BottomTabBar.styles';
 import type { BottomTabBarProps } from './BottomTabBar.types';
 
-const TAB_ICON_SIZE = 24;
-const BLUR_INTENSITY = 5;
+const TAB_ICON_SIZE = Platform.OS === 'android' ? 24 : 26;
+const BLUR_INTENSITY = 12;
 const INDICATOR_DURATION_MS = 280;
 
 const isIos = Platform.OS === 'ios';
@@ -64,7 +64,10 @@ function BottomTabBarInner({ items, activeKey, onTabPress, testID }: BottomTabBa
       testID={testID}
     >
       {isIos ? (
-        <BlurView intensity={BLUR_INTENSITY} tint="regular" style={StyleSheet.absoluteFill} />
+        <>
+          <BlurView intensity={BLUR_INTENSITY} tint="regular" style={StyleSheet.absoluteFill} />
+          <View style={[StyleSheet.absoluteFill, styles.iosTintOverlay]} pointerEvents="none" />
+        </>
       ) : null}
       {layoutsReady ? (
         <Animated.View style={[styles.indicator, indicatorStyle]} pointerEvents="none" />

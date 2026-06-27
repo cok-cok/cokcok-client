@@ -6,6 +6,7 @@ import {
   BOTTOM_TAB_BAR_INDICATOR_BG,
   BOTTOM_TAB_BAR_INDICATOR_BORDER,
   BOTTOM_TAB_BAR_INDICATOR_INSET_V,
+  BOTTOM_TAB_BAR_IOS_TINT_OVERLAY,
   BOTTOM_TAB_BAR_PADDING_H,
 } from './BottomTabBar.constants';
 
@@ -51,9 +52,12 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: Platform.OS === 'android' ? '700' : '800',
     letterSpacing: -0.1,
     includeFontPadding: false,
     color: BOTTOM_TAB_BAR_COLOR,
+  },
+  iosTintOverlay: {
+    backgroundColor: BOTTOM_TAB_BAR_IOS_TINT_OVERLAY,
   },
 });
