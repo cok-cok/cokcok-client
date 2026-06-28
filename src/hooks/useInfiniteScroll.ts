@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type InfiniteScrollFetchResult<T> = {
   items: T[];
-  hasMore: boolean;
+  nextPage: number | null;
 };
 
 export type UseInfiniteScrollOptions<T> = {
@@ -39,9 +39,8 @@ export function useInfiniteScroll<T>({
   const [error, setError] = useState<Error | null>(null);
   const [endReachedKey, setEndReachedKey] = useState(0);
 
-  const pageRef = useRef(initialPage);
+  const nextPageRef = useRef<number | null>(initialPage);
   const lockRef = useRef(false);
-  const hasMoreRef = useRef(true);
   const endLockUntilRef = useRef(0);
 
   const fetchPage = useCallback(
@@ -53,9 +52,8 @@ export function useInfiniteScroll<T>({
 
       try {
         const result = await fetcher({ page: target });
-        pageRef.current = target;
-        hasMoreRef.current = result.hasMore;
-        setHasMore(result.hasMore);
+        nextPageRef.current = result.nextPage;
+        setHasMore(result.nextPage !== null);
 
         if (append) {
           setIsLoadingMore(false);
@@ -75,7 +73,7 @@ export function useInfiniteScroll<T>({
 
   const loadMore = useCallback(async () => {
     if (lockRef.current) return;
-    if (!hasMoreRef.current) {
+    if (nextPageRef.current === null) {
       if (Date.now() < endLockUntilRef.current) return;
       lockRef.current = true;
       setIsLoadingMore(true);
@@ -87,13 +85,12 @@ export function useInfiniteScroll<T>({
       lockRef.current = false;
       return;
     }
-    await fetchPage(pageRef.current + 1, true);
+    await fetchPage(nextPageRef.current, true);
   }, [fetchPage]);
 
   const reload = useCallback(() => {
     if (lockRef.current) return Promise.resolve();
-    pageRef.current = initialPage;
-    hasMoreRef.current = true;
+    nextPageRef.current = initialPage;
     endLockUntilRef.current = 0;
     setHasMore(true);
     setEndReachedKey(0);

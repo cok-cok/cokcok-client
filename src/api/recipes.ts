@@ -22,7 +22,7 @@ export type GetMyRecipesParams = {
 
 export type GetMyRecipesResponse = {
   recipes: Recipe[];
-  hasMore: boolean;
+  nextPage: number | null;
 };
 
 const DEFAULT_PAGE = 1;
