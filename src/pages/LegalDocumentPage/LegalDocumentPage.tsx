@@ -8,8 +8,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { legalApi } from '../../api';
 import { Button } from '../../components/Button';
 import { PageHeader } from '../../components/PageHeader';
-import { Spinner } from '../../components/Spinner';
+import { Skeleton } from '../../components/Skeleton';
 import { useToast } from '../../components/Toast';
+import { useDelayedSkeleton } from '../../hooks';
 import type { RootStackParamList } from '../../navigation/types';
 import { markdownStyles, styles } from './LegalDocumentPage.styles';
 
@@ -22,6 +23,7 @@ export default function LegalDocumentPage({ navigation, route }: Props) {
 
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedSkeleton(loading);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +55,52 @@ export default function LegalDocumentPage({ navigation, route }: Props) {
 
   const handleDecline = useCallback(() => navigation.goBack(), [navigation]);
 
+  const renderBody = () => {
+    if (showSkeleton) {
+      return (
+        <ScrollView
+          contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24, gap: 28 }]}
+        >
+          {Array.from({ length: 5 }, (_, i) => (
+            <View key={i} style={{ gap: 10 }}>
+              <Skeleton width="42%" height={18} />
+              <Skeleton width="100%" height={14} />
+              <Skeleton width="95%" height={14} />
+              <Skeleton width="88%" height={14} />
+              <Skeleton width="72%" height={14} />
+            </View>
+          ))}
+        </ScrollView>
+      );
+    }
+    if (loading) return null;
+    return (
+      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}>
+        <Markdown style={markdownStyles}>{content ?? ''}</Markdown>
+        <View style={styles.agreeWrap}>
+          {isOptional ? (
+            <View style={styles.agreeRow}>
+              <View style={styles.agreeRowItem}>
+                <Button
+                  fullWidth
+                  size="lg"
+                  variant="normal"
+                  label="동의 안 함"
+                  onPress={handleDecline}
+                />
+              </View>
+              <View style={styles.agreeRowItem}>
+                <Button fullWidth size="lg" label="동의" onPress={handleAgree} />
+              </View>
+            </View>
+          ) : (
+            <Button fullWidth size="lg" label="동의" onPress={handleAgree} />
+          )}
+        </View>
+      </ScrollView>
+    );
+  };
+
   return (
     <View style={styles.root}>
       <PageHeader
@@ -61,38 +109,7 @@ export default function LegalDocumentPage({ navigation, route }: Props) {
         borderBottom
       />
       <View style={{ height: insets.top + PageHeader.HEIGHT }} />
-
-      {loading ? (
-        <View style={styles.loadingFull}>
-          <Spinner color="brand" />
-        </View>
-      ) : (
-        <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
-        >
-          <Markdown style={markdownStyles}>{content ?? ''}</Markdown>
-          <View style={styles.agreeWrap}>
-            {isOptional ? (
-              <View style={styles.agreeRow}>
-                <View style={styles.agreeRowItem}>
-                  <Button
-                    fullWidth
-                    size="lg"
-                    variant="normal"
-                    label="동의 안 함"
-                    onPress={handleDecline}
-                  />
-                </View>
-                <View style={styles.agreeRowItem}>
-                  <Button fullWidth size="lg" label="동의" onPress={handleAgree} />
-                </View>
-              </View>
-            ) : (
-              <Button fullWidth size="lg" label="동의" onPress={handleAgree} />
-            )}
-          </View>
-        </ScrollView>
-      )}
+      {renderBody()}
     </View>
   );
 }

@@ -8,8 +8,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { legalApi, type LegalKey, type LegalManifestItem } from '../../api';
 import { Button } from '../../components/Button';
 import { Checkbox } from '../../components/Checkbox';
-import { Spinner } from '../../components/Spinner';
+import { Skeleton } from '../../components/Skeleton';
 import { useToast } from '../../components/Toast';
+import { useDelayedSkeleton } from '../../hooks';
 import type { RootStackParamList } from '../../navigation/types';
 import { styles as localStyles } from './SignupAgreementsStep.styles';
 import { styles as pageStyles } from './SignupPage.styles';
@@ -35,6 +36,7 @@ export function SignupAgreementsStep({
 
   const [manifest, setManifest] = useState<LegalManifestItem[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedSkeleton(loading);
 
   const chainRef = useRef<{ queue: LegalManifestItem[]; index: number } | null>(null);
 
@@ -183,13 +185,38 @@ export function SignupAgreementsStep({
     });
   }, [allAgreed, manifest, agreed, navigation, onAgreedChange, chainAgreeCallback]);
 
-  if (loading || !manifest) {
+  if (showSkeleton) {
     return (
-      <View style={[pageStyles.stepContainer, localStyles.loadingWrap]}>
-        <Spinner color="brand" />
+      <View style={pageStyles.stepContainer}>
+        <ScrollView contentContainerStyle={pageStyles.stepScroll}>
+          <View style={localStyles.list}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Skeleton width={26} height={26} borderRadius={7} />
+              <Skeleton width={70} height={15} />
+            </View>
+            <View style={localStyles.divider} />
+            {[
+              { label: 170, viewLink: true },
+              { label: 190, viewLink: true },
+              { label: 200, viewLink: false },
+              { label: 220, viewLink: true },
+            ].map((row, i) => (
+              <View key={i} style={localStyles.itemRow}>
+                <View style={localStyles.itemCheckbox}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Skeleton width={22} height={22} borderRadius={6} />
+                    <Skeleton width={row.label} height={14} />
+                  </View>
+                </View>
+                {row.viewLink ? <Skeleton width={28} height={13} /> : null}
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
     );
   }
+  if (loading || !manifest) return <View style={pageStyles.stepContainer} />;
 
   return (
     <View style={pageStyles.stepContainer}>
