@@ -1,3 +1,5 @@
+export type { UseDelayedSkeletonOptions } from './useDelayedSkeleton';
+export { useDelayedSkeleton } from './useDelayedSkeleton';
 export type {
   InfiniteScrollFetchResult,
   UseInfiniteScrollOptions,
