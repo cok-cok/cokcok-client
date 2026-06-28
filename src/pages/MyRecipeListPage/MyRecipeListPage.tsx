@@ -19,7 +19,7 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-const PAGE_BG = '#FBFAF9';
+const PAGE_BG = '#FAF9F6';
 const HEADER_BG = '#FFFFFF';
 
 export default function MyRecipeListPage({ navigation }: Props) {
