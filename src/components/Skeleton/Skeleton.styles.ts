@@ -1,0 +1,5 @@
+export const SKELETON_BASE_COLOR = '#E5E7EB';
+export const SKELETON_DURATION_MS = 1100;
+export const SKELETON_OPACITY_FROM = 0.55;
+export const SKELETON_OPACITY_TO = 1;
+export const SKELETON_DEFAULT_RADIUS = 4;
