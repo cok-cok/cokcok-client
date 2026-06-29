@@ -8,6 +8,7 @@ import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
 import { Input } from '../../components/Input';
 import { useToast } from '../../components/Toast';
+import { SIGNUP_FAKE_LATENCY_MS, SIGNUP_USE_MOCK } from '../../mocks/signup.mock';
 import {
   BRAND_COLOR,
   CODE_CONFIRM_LABEL,
@@ -20,7 +21,6 @@ import {
   EMAIL_RESEND_LABEL,
   EMAIL_VERIFIED_MESSAGE,
   EMAIL_VERIFY_LABEL,
-  FAKE_LATENCY_MS,
   INVALID_EMAIL_MESSAGE,
   INVALID_NICKNAME_MESSAGE,
   INVALID_PASSWORD_MESSAGE,
@@ -40,7 +40,6 @@ import {
   PASSWORD_PLACEHOLDER,
   PASSWORD_REGEX,
   SIGNUP_BUTTON_LABEL,
-  USE_MOCK_API,
   VERIFICATION_CODE_LABEL,
   VERIFICATION_CODE_PLACEHOLDER,
   VERIFICATION_CODE_SENT_MESSAGE,
@@ -245,8 +244,8 @@ export function SignupForm({
 
     setSubmitting(true);
     try {
-      if (USE_MOCK_API) {
-        await new Promise((r) => setTimeout(r, FAKE_LATENCY_MS));
+      if (SIGNUP_USE_MOCK) {
+        await new Promise((r) => setTimeout(r, SIGNUP_FAKE_LATENCY_MS));
       } else {
         await authApi.signup({ email, password, nickname });
       }
