@@ -1,9 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const RECIPE_LIST_TOOLBAR_HEIGHT = 52;
-
-const TOOLBAR_BG = '#FFFFFF';
-const TOOLBAR_BORDER = 'rgba(0,0,0,0.06)';
+export const RECIPE_LIST_TOOLBAR_HEIGHT = 36;
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,10 +8,8 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    backgroundColor: TOOLBAR_BG,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: TOOLBAR_BORDER,
+    paddingHorizontal: 10,
+    backgroundColor: 'transparent',
   },
   rightSlot: {
     flexDirection: 'row',
