@@ -1,11 +1,11 @@
 import type { StyleProp, ViewStyle } from 'react-native';
 
-import type { IconName } from '../Icon';
+import type { ReactNode } from 'react';
 
 export type SegmentedOption<T extends string> = {
   value: T;
-  icon?: IconName;
-  label?: string;
+  iconInactive: ReactNode;
+  iconActive: ReactNode;
   accessibilityLabel: string;
 };
 
