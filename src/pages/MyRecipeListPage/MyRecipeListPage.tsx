@@ -1,8 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  ScrollView,
+  View,
+} from 'react-native';
 import Animated, {
-  useAnimatedRef,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -16,8 +19,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { FlashListRef } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 
-import { type Recipe,recipesApi } from '../../api';
+import { type Recipe, recipesApi } from '../../api';
 import { useRequireAuth } from '../../auth';
+import {
+  BOTTOM_BAR_BOTTOM_OFFSET,
+  BOTTOM_BAR_FAB_SIZE,
+} from '../../components/BottomBar/BottomBar.constants';
 import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -67,7 +74,12 @@ export default function MyRecipeListPage({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const requireAuth = useRequireAuth();
 
-  const [columns, setColumns] = useState<RecipeListColumns>(2);
+  const headerOffset = insets.top + PageHeader.HEIGHT;
+  const toolbarTop = headerOffset + GRID_GAP;
+  const listPaddingTop = toolbarTop + RECIPE_LIST_TOOLBAR_HEIGHT + GRID_GAP;
+  const bottomBarOverlayHeight = insets.bottom + BOTTOM_BAR_FAB_SIZE + BOTTOM_BAR_BOTTOM_OFFSET;
+
+  const [columns, setColumns] = useState<RecipeListColumns>(1);
 
   const fetcher = useCallback(
     async ({ page }: { page: number }) => {
@@ -81,6 +93,7 @@ export default function MyRecipeListPage({ navigation }: Props) {
     data: recipes,
     isLoading,
     isLoadingMore,
+    hasMore,
     error,
     endReachedKey,
     loadMore,
@@ -89,18 +102,39 @@ export default function MyRecipeListPage({ navigation }: Props) {
 
   const showSkeleton = useDelayedSkeleton(isLoading && recipes.length === 0);
 
+  useEffect(() => {
+    if (!hasMore && recipes.length > 0 && !isLoading) {
+      void loadMore();
+    }
+  }, [hasMore, recipes.length, isLoading, loadMore]);
+
+  const didInitialNudgeRef = useRef(false);
+  useEffect(() => {
+    if (didInitialNudgeRef.current) return;
+    if (recipes.length === 0 || isLoading) return;
+    didInitialNudgeRef.current = true;
+    setTimeout(() => {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, 80);
+  }, [recipes.length, isLoading]);
+
+
   const { hideValue, registerScrollToTop } = useTabBarContext();
-  const flashListRef = useAnimatedRef<FlashListRef<Recipe>>();
+  const flashListRef = useRef<FlashListRef<Recipe>>(null);
   const lastY = useSharedValue(0);
+  const skipDeltaUntilRef = useRef(0);
+  const pendingScrollIndexRef = useRef<number | null>(null);
+  const hasUserScrolledRef = useRef(false);
 
   const scrollToTop = useCallback(() => {
     flashListRef.current?.scrollToOffset({ offset: 0, animated: true });
-  }, [flashListRef]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
       hideValue.value = withTiming(0, { duration: RESET_DURATION_MS });
       lastY.value = 0;
+      skipDeltaUntilRef.current = Date.now() + 600;
       registerScrollToTop(scrollToTop);
       return () => {
         registerScrollToTop(null);
@@ -108,31 +142,131 @@ export default function MyRecipeListPage({ navigation }: Props) {
     }, [hideValue, lastY, registerScrollToTop, scrollToTop]),
   );
 
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      const currentY = event.contentOffset.y;
-      const contentHeight = event.contentSize.height;
-      const viewportHeight = event.layoutMeasurement.height;
-      const maxScroll = Math.max(0, contentHeight - viewportHeight);
-      const isOverscroll = currentY < 0 || currentY > maxScroll;
+  const measureTopVisibleIndex = useCallback((): number => {
+    const ref = flashListRef.current;
+    if (!ref) return 0;
 
-      if (!isOverscroll) {
+    const scrollOffset = ref.getAbsoluteLastScrollOffset();
+    // 초기/최상단: layout 측정 부정확 가능 → 첫 카드 고정
+    if (scrollOffset <= TOP_THRESHOLD) return 0;
+
+    // ListHeaderComponent는 list 카드 layout과 별개라서 카드 #0.layout.y = 0.
+    // 화면 위치 = X.layout.y - scrollOffset + listPaddingTop
+    // toolbar bottom = headerOffset + RECIPE_LIST_TOOLBAR_HEIGHT
+    // 안 겹치는 첫 카드 조건: X.layout.y >= scrollOffset - GRID_GAP
+    const targetY = scrollOffset - GRID_GAP;
+    const total = recipes.length;
+    if (total === 0) return 0;
+
+    let leftX = Infinity;
+    for (let i = 0; i < total; i++) {
+      const layout = ref.getLayout(i);
+      if (!layout) continue;
+      if (layout.x < leftX) leftX = layout.x;
+    }
+    if (!Number.isFinite(leftX)) return 0;
+
+    let bestIdx = 0;
+    let bestY = Infinity;
+    for (let i = 0; i < total; i++) {
+      const layout = ref.getLayout(i);
+      if (!layout) continue;
+      if (Math.abs(layout.x - leftX) > 5) continue;
+      if (layout.y < targetY) continue;
+      if (layout.y < bestY) {
+        bestY = layout.y;
+        bestIdx = i;
+      }
+    }
+    return bestIdx;
+  }, [recipes.length]);
+
+  const handleColumnsChange = useCallback(
+    (next: RecipeListColumns) => {
+      if (next === columns) return;
+      pendingScrollIndexRef.current = hasUserScrolledRef.current
+        ? measureTopVisibleIndex()
+        : 0;
+      setColumns(next);
+      hideValue.value = withTiming(0, { duration: RESET_DURATION_MS });
+      skipDeltaUntilRef.current = Date.now() + 1500;
+    },
+    [columns, hideValue, measureTopVisibleIndex],
+  );
+
+  useEffect(() => {
+    if (pendingScrollIndexRef.current == null) return;
+    const targetIndex = pendingScrollIndexRef.current;
+    pendingScrollIndexRef.current = null;
+
+    const attempt = (retries: number) => {
+      const ref = flashListRef.current;
+      if (!ref) return;
+      const layout = ref.getLayout(targetIndex);
+      if (!layout) {
+        if (retries > 0) setTimeout(() => attempt(retries - 1), 60);
+        return;
+      }
+      // 화면 위치 = X.layout.y - scrollOffset + listPaddingTop
+      // toolbar 바로 아래 + GRID_GAP = listPaddingTop 위치
+      // → scrollOffset = X.layout.y
+      const targetOffset = Math.max(0, layout.y);
+      ref.scrollToOffset({ offset: targetOffset, animated: false });
+    };
+
+    requestAnimationFrame(() => attempt(4));
+  }, [columns]);
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const currentY = event.nativeEvent.contentOffset.y;
+      const contentHeight = event.nativeEvent.contentSize.height;
+      const viewportHeight = event.nativeEvent.layoutMeasurement.height;
+      const maxScroll = Math.max(0, contentHeight - viewportHeight);
+      const atEnd = maxScroll > 0 && currentY >= maxScroll - 1;
+      const isOverscroll = currentY < 0 || currentY > maxScroll;
+      const ignoreDelta = Date.now() < skipDeltaUntilRef.current;
+
+      if (!ignoreDelta) {
         const delta = currentY - lastY.value;
         if (currentY <= TOP_THRESHOLD) {
           hideValue.value = withTiming(0, { duration: HIDE_DURATION_MS });
-        } else if (delta > HIDE_DELTA_THRESHOLD) {
+        } else if (delta > HIDE_DELTA_THRESHOLD || atEnd) {
           hideValue.value = withTiming(1, { duration: HIDE_DURATION_MS });
-        } else if (delta < -HIDE_DELTA_THRESHOLD) {
+        } else if (delta < -HIDE_DELTA_THRESHOLD && currentY < maxScroll - 10) {
           hideValue.value = withTiming(0, { duration: HIDE_DURATION_MS });
         }
       }
 
+      if (atEnd || isOverscroll) {
+        void loadMore();
+      }
+
       lastY.value = currentY;
     },
-  });
+    [hideValue, lastY, loadMore],
+  );
+
+  const handleScrollBeginDrag = useCallback(() => {
+    hasUserScrolledRef.current = true;
+  }, []);
+
+  const handleScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const currentY = event.nativeEvent.contentOffset.y;
+      const contentHeight = event.nativeEvent.contentSize.height;
+      const viewportHeight = event.nativeEvent.layoutMeasurement.height;
+      const maxScroll = Math.max(0, contentHeight - viewportHeight);
+      if (maxScroll > 0 && currentY >= maxScroll - 1) {
+        hideValue.value = withTiming(1, { duration: HIDE_DURATION_MS });
+        void loadMore();
+      }
+    },
+    [hideValue, loadMore],
+  );
 
   const toolbarAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: hideValue.value * -RECIPE_LIST_TOOLBAR_HEIGHT }],
+    transform: [{ translateY: hideValue.value * -(RECIPE_LIST_TOOLBAR_HEIGHT + GRID_GAP) }],
   }));
 
   const skeletonVariants = useMemo(
@@ -152,25 +286,60 @@ export default function MyRecipeListPage({ navigation }: Props) {
 
   const renderItem = useCallback(
     ({ item }: { item: Recipe }) => (
-      <RecipeCard
-        title={item.title}
-        thumbnailUrl={item.thumbnailUrl || undefined}
-        description={item.description}
-        tags={item.tags}
-        cookTime={item.cookTime}
-        portion={item.portion}
-        layout={columns === 2 ? 'vertical' : 'horizontal'}
-        onPress={() => goDetail(item)}
-      />
+      <View style={{ paddingHorizontal: columns === 2 ? GRID_GAP / 2 : 0 }}>
+        <RecipeCard
+          title={item.title}
+          thumbnailUrl={item.thumbnailUrl || undefined}
+          description={item.description}
+          tags={item.tags}
+          cookTime={item.cookTime}
+          portion={item.portion}
+          layout={columns === 2 ? 'vertical' : 'horizontal'}
+          onPress={() => goDetail(item)}
+        />
+      </View>
     ),
     [columns, goDetail],
   );
 
   const renderItemSeparator = useCallback(() => <View style={{ height: GRID_GAP }} />, []);
 
-  const headerOffset = insets.top + PageHeader.HEIGHT;
-  const listPaddingTop = headerOffset + RECIPE_LIST_TOOLBAR_HEIGHT + GRID_GAP;
-  const listPaddingBottom = insets.bottom + 100;
+  const keyExtractor = useCallback((item: Recipe) => String(item.id), []);
+
+  const handleEndReached = useCallback(() => void loadMore(), [loadMore]);
+
+  const handleListLoad = useCallback(() => {
+    flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, []);
+
+  const listContentContainerStyle = useMemo(
+    () => ({
+      paddingTop: 0,
+      paddingHorizontal: columns === 2 ? 16 - GRID_GAP / 2 : 16,
+      paddingBottom: 0,
+    }),
+    [columns],
+  );
+
+  const listHeader = useMemo(
+    () => <View style={{ height: listPaddingTop }} />,
+    [listPaddingTop],
+  );
+
+  const listFooter = useMemo(
+    () => (
+      <View style={{ paddingTop: 12 }}>
+        <View style={{ height: bottomBarOverlayHeight, justifyContent: 'flex-start' }}>
+          <InfiniteScrollFooter
+            isLoadingMore={isLoadingMore}
+            endReachedKey={endReachedKey}
+            endMessage="마지막 레시피까지 모두 둘러봤어요"
+          />
+        </View>
+      </View>
+    ),
+    [bottomBarOverlayHeight, endReachedKey, isLoadingMore],
+  );
 
   const showError = error !== null && recipes.length === 0;
   const showEmpty = !isLoading && !error && recipes.length === 0;
@@ -183,7 +352,7 @@ export default function MyRecipeListPage({ navigation }: Props) {
           contentContainerStyle={{
             paddingTop: headerOffset + GRID_GAP,
             paddingHorizontal: 16,
-            paddingBottom: listPaddingBottom,
+            paddingBottom: bottomBarOverlayHeight,
           }}
         >
           {columns === 2 ? (
@@ -213,7 +382,7 @@ export default function MyRecipeListPage({ navigation }: Props) {
           style={{
             flex: 1,
             paddingTop: headerOffset,
-            paddingBottom: listPaddingBottom,
+            paddingBottom: bottomBarOverlayHeight,
             justifyContent: 'center',
           }}
         >
@@ -230,7 +399,7 @@ export default function MyRecipeListPage({ navigation }: Props) {
           style={{
             flex: 1,
             paddingTop: headerOffset,
-            paddingBottom: listPaddingBottom,
+            paddingBottom: bottomBarOverlayHeight,
             justifyContent: 'center',
           }}
         >
@@ -255,25 +424,21 @@ export default function MyRecipeListPage({ navigation }: Props) {
           data={recipes}
           columns={columns}
           masonry={columns === 2}
-          keyExtractor={(item) => String(item.id)}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           ItemSeparatorComponent={renderItemSeparator}
-          onScroll={onScroll}
+          onScroll={handleScroll}
+          onScrollBeginDrag={handleScrollBeginDrag}
+          onScrollEndDrag={handleScrollEndDrag}
           scrollEventThrottle={16}
-          contentContainerStyle={{
-            paddingTop: listPaddingTop,
-            paddingHorizontal: 16,
-            paddingBottom: listPaddingBottom,
-          }}
-          onEndReached={() => void loadMore()}
+          overScrollMode="always"
+          contentContainerStyle={listContentContainerStyle}
+          ListHeaderComponent={listHeader}
+          drawDistance={1500}
+          onLoad={handleListLoad}
+          onEndReached={handleEndReached}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            <InfiniteScrollFooter
-              isLoadingMore={isLoadingMore}
-              endReachedKey={endReachedKey}
-              endMessage="마지막 레시피까지 모두 둘러봤어요"
-            />
-          }
+          ListFooterComponent={listFooter}
         />
       ) : null}
 
@@ -282,7 +447,7 @@ export default function MyRecipeListPage({ navigation }: Props) {
           style={[
             {
               position: 'absolute',
-              top: headerOffset,
+              top: toolbarTop,
               left: 0,
               right: 0,
               zIndex: 5,
@@ -290,7 +455,7 @@ export default function MyRecipeListPage({ navigation }: Props) {
             toolbarAnimatedStyle,
           ]}
         >
-          <RecipeListToolbar columns={columns} onColumnsChange={setColumns} />
+          <RecipeListToolbar columns={columns} onColumnsChange={handleColumnsChange} />
         </Animated.View>
       ) : null}
 
