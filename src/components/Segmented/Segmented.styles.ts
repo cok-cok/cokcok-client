@@ -1,49 +1,54 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 export const SEGMENTED_HEIGHT = 36;
-export const SEGMENTED_ITEM_HEIGHT = 30;
-export const SEGMENTED_PADDING = 3;
+export const SEGMENTED_PADDING_H = 3;
+export const SEGMENTED_INDICATOR_INSET_V = 3;
 
-const TRACK_BG = '#EDEEF1';
-const INDICATOR_BG = '#FFFFFF';
-const ACTIVE_TEXT = '#111827';
-const INACTIVE_TEXT = '#6B7280';
+export const SEGMENTED_ANDROID_BG = 'rgba(235,238,242,0.9)';
+export const SEGMENTED_IOS_TINT_OVERLAY = 'rgba(235,238,242,0.65)';
 
-export const SEGMENTED_ACTIVE_COLOR = ACTIVE_TEXT;
-export const SEGMENTED_INACTIVE_COLOR = INACTIVE_TEXT;
+export const SEGMENTED_INDICATOR_BG =
+  Platform.OS === 'android' ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.9)';
+export const SEGMENTED_INDICATOR_BORDER = 'rgba(255,255,255,0.85)';
 
 export const styles = StyleSheet.create({
-  track: {
+  bar: {
+    height: SEGMENTED_HEIGHT,
+    borderRadius: 999,
     flexDirection: 'row',
     alignItems: 'center',
-    height: SEGMENTED_HEIGHT,
-    borderRadius: SEGMENTED_HEIGHT / 2,
-    backgroundColor: TRACK_BG,
-    padding: SEGMENTED_PADDING,
-    position: 'relative',
+    paddingHorizontal: SEGMENTED_PADDING_H,
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
+  },
+  iosTintOverlay: {
+    backgroundColor: SEGMENTED_IOS_TINT_OVERLAY,
   },
   indicator: {
     position: 'absolute',
-    top: SEGMENTED_PADDING,
-    height: SEGMENTED_ITEM_HEIGHT,
-    borderRadius: SEGMENTED_ITEM_HEIGHT / 2,
-    backgroundColor: INDICATOR_BG,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    top: SEGMENTED_INDICATOR_INSET_V,
+    bottom: SEGMENTED_INDICATOR_INSET_V,
+    left: 0,
+    borderRadius: 999,
+    backgroundColor: SEGMENTED_INDICATOR_BG,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: SEGMENTED_INDICATOR_BORDER,
+    ...Platform.select({
+      android: {
+        boxShadow: '0px 1px 4px rgba(0,0,0,0.08)',
+      },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 3,
+      },
+    }),
   },
   item: {
-    height: SEGMENTED_ITEM_HEIGHT,
+    height: SEGMENTED_HEIGHT,
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 6,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
   },
 });

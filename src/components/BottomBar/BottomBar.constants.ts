@@ -15,20 +15,20 @@ export const BOTTOM_BAR_TABS: BottomTabBarItem[] = [
   {
     key: 'MyRecipeList',
     label: '내 레시피',
-    iconInactive: 'book-outline',
-    iconActive: 'book',
+    iconInactive: 'book',
+    iconActive: 'book-outline',
   },
   {
     key: 'RecommendedRecipes',
     label: '추천 레시피',
-    iconInactive: 'restaurant-outline',
-    iconActive: 'restaurant',
+    iconInactive: 'restaurant',
+    iconActive: 'restaurant-outline',
     disabled: true,
   },
   {
     key: 'MyPage',
     label: '마이페이지',
-    iconInactive: 'person-outline',
-    iconActive: 'person',
+    iconInactive: 'person',
+    iconActive: 'person-outline',
   },
 ];

@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 const RECIPE_CARD_BORDER_RADIUS = 12;
 const RECIPE_CARD_THUMBNAIL_WIDTH = 120;
@@ -49,11 +49,17 @@ export const styles = StyleSheet.create({
     borderRadius: RECIPE_CARD_BORDER_RADIUS,
     overflow: 'hidden',
     alignSelf: 'stretch',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
+      },
+      android: {
+        boxShadow: '0px 2px 6px rgba(0,0,0,0.08)',
+      },
+    }),
   },
 
   horizontalRow: {
