@@ -49,7 +49,3 @@ export const EMAIL_VERIFIED_MESSAGE = '이메일 인증이 완료됐어요.';
 export const NICKNAME_AVAILABLE_MESSAGE = '사용 가능한 닉네임이에요.';
 
 export const NETWORK_ERROR_MESSAGE = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-
-// TODO 실제 API 붙으면 false로 바꾸고 mock 블록 제거
-export const USE_MOCK_API = true;
-export const FAKE_LATENCY_MS = 500;

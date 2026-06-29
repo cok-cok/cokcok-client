@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ApiError, authApi } from '../../api';
+import { SIGNUP_FAKE_LATENCY_MS, SIGNUP_USE_MOCK } from '../../mocks/signup.mock';
 import {
   COUNTDOWN_TICK_MS,
-  FAKE_LATENCY_MS,
   NETWORK_ERROR_MESSAGE,
-  USE_MOCK_API,
   VERIFICATION_CODE_EXPIRY_MS,
   VERIFICATION_RESEND_COOLDOWN_MS,
 } from './SignupPage.constants';
@@ -96,8 +95,8 @@ export function useEmailVerification(): Result {
       setState((prev) => ({ ...prev, busy: true }));
 
       try {
-        if (USE_MOCK_API) {
-          await new Promise((r) => setTimeout(r, FAKE_LATENCY_MS));
+        if (SIGNUP_USE_MOCK) {
+          await new Promise((r) => setTimeout(r, SIGNUP_FAKE_LATENCY_MS));
         } else {
           await authApi.requestEmailVerification({ email });
         }
@@ -129,8 +128,8 @@ export function useEmailVerification(): Result {
       setState((prev) => ({ ...prev, busy: true }));
 
       try {
-        if (USE_MOCK_API) {
-          await new Promise((r) => setTimeout(r, FAKE_LATENCY_MS));
+        if (SIGNUP_USE_MOCK) {
+          await new Promise((r) => setTimeout(r, SIGNUP_FAKE_LATENCY_MS));
         } else {
           await authApi.confirmEmailVerification({ email, code });
         }

@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { ApiError, authApi } from '../../api';
-import { FAKE_LATENCY_MS, NETWORK_ERROR_MESSAGE, USE_MOCK_API } from './SignupPage.constants';
+import { SIGNUP_FAKE_LATENCY_MS, SIGNUP_USE_MOCK } from '../../mocks/signup.mock';
+import { NETWORK_ERROR_MESSAGE } from './SignupPage.constants';
 
 type NicknameCheckState = {
   available: boolean | undefined;
@@ -25,8 +26,8 @@ export function useNicknameCheck(): Result {
   const check = useCallback<(nickname: string) => Promise<CheckResult>>(async (nickname) => {
     setState((prev) => ({ ...prev, busy: true }));
     try {
-      if (USE_MOCK_API) {
-        await new Promise((r) => setTimeout(r, FAKE_LATENCY_MS));
+      if (SIGNUP_USE_MOCK) {
+        await new Promise((r) => setTimeout(r, SIGNUP_FAKE_LATENCY_MS));
       } else {
         await authApi.checkNickname(nickname);
       }
