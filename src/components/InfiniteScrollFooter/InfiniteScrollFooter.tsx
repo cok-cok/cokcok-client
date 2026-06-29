@@ -45,11 +45,9 @@ function InfiniteScrollFooterInner({
 
   return (
     <View style={styles.container}>
-      {isLoadingMore || spinnerOpacity.value > 0 ? (
-        <Animated.View style={[styles.layer, spinnerStyle]} pointerEvents="none">
-          <Spinner />
-        </Animated.View>
-      ) : null}
+      <Animated.View style={[styles.layer, spinnerStyle]} pointerEvents="none">
+        <Spinner />
+      </Animated.View>
       {triggered ? (
         <Animated.View style={[styles.layer, messageStyle]} pointerEvents="none">
           <Text style={styles.endMessage}>{endMessage}</Text>
