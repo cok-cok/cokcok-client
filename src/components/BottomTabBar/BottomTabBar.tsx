@@ -16,11 +16,12 @@ import {
   BOTTOM_TAB_BAR_ANDROID_BG,
   BOTTOM_TAB_BAR_COLOR,
   BOTTOM_TAB_BAR_DISABLED_COLOR,
+  BOTTOM_TAB_BAR_INACTIVE_COLOR,
 } from './BottomTabBar.constants';
 import { styles } from './BottomTabBar.styles';
 import type { BottomTabBarProps } from './BottomTabBar.types';
 
-const TAB_ICON_SIZE = Platform.OS === 'android' ? 24 : 26;
+const TAB_ICON_SIZE = Platform.OS === 'android' ? 26 : 28;
 const BLUR_INTENSITY = 12;
 const INDICATOR_DURATION_MS = 280;
 
@@ -74,7 +75,11 @@ function BottomTabBarInner({ items, activeKey, onTabPress, testID }: BottomTabBa
       ) : null}
       {items.map((item, index) => {
         const isActive = item.key === activeKey;
-        const itemColor = item.disabled ? BOTTOM_TAB_BAR_DISABLED_COLOR : BOTTOM_TAB_BAR_COLOR;
+        const itemColor = item.disabled
+          ? BOTTOM_TAB_BAR_DISABLED_COLOR
+          : isActive
+            ? BOTTOM_TAB_BAR_COLOR
+            : BOTTOM_TAB_BAR_INACTIVE_COLOR;
         return (
           <Pressable
             key={item.key}
